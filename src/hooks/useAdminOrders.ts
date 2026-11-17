@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { adminOrders } from '@/services/orders';
-import { ORDERS_CHANGED_EVENT } from '@/services/orders/mock/mockAdminOrderRepository';
+import { ORDERS_CHANGED_EVENT } from '@/services/events';
 import type { Order } from '@/types/order';
 
 export function useAdminOrders() {

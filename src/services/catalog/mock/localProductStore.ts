@@ -1,6 +1,7 @@
 import type { Product } from '@/types/catalog';
 import { kv, type KeyValueStore } from '@/lib/kvStore';
 import { MOCK_PRODUCTS } from '@/data/mock/products';
+import { PRODUCTS_CHANGED_EVENT } from '@/services/events';
 
 /**
  * DEMO ONLY — the Phase 1 product "database", shared by the storefront and the
@@ -8,7 +9,8 @@ import { MOCK_PRODUCTS } from '@/data/mock/products';
  * Seeded with the demo catalog on first use. Replaced by Supabase in Phase 2.
  */
 const KEY = 'products.v1';
-const CHANGE_EVENT = 'store:products-changed';
+
+const CHANGE_EVENT = PRODUCTS_CHANGED_EVENT;
 
 export function createProductStore(store: KeyValueStore, seed: Product[] = MOCK_PRODUCTS) {
   let cache: Product[] | null = null;
@@ -46,4 +48,4 @@ export function createProductStore(store: KeyValueStore, seed: Product[] = MOCK_
 
 export type ProductStore = ReturnType<typeof createProductStore>;
 export const localProductStore = createProductStore(kv);
-export const PRODUCTS_CHANGED_EVENT = CHANGE_EVENT;
+export { PRODUCTS_CHANGED_EVENT };

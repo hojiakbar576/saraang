@@ -6,6 +6,7 @@ import { PageHeader, Panel } from '@/components/admin/AdminUI';
 import { Button } from '@/components/ui/Button';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { adminOrders } from '@/services/orders';
+import { supabaseEnabled } from '@/services/supabase/client';
 
 export function SettingsPage() {
   const s = t.admin.settings;
@@ -42,7 +43,7 @@ export function SettingsPage() {
           {brand.contactsArePlaceholders && <p className="border-t border-line px-5 py-3 text-xs text-clay">{s.placeholders}</p>}
         </Panel>
 
-        {import.meta.env.DEV && (
+        {import.meta.env.DEV && !supabaseEnabled && (
           <Panel title={s.demoData}>
             <div className="space-y-4 p-5 text-sm">
               <p className="text-muted">{s.demoDataText}</p>

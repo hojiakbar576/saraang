@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { adminProducts } from '@/services/catalog';
-import { PRODUCTS_CHANGED_EVENT } from '@/services/catalog/mock/localProductStore';
+import { PRODUCTS_CHANGED_EVENT } from '@/services/events';
 import type { Product } from '@/types/catalog';
 
 export function useAdminProducts() {

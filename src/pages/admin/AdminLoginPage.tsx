@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/form';
 import { useAdminAuth } from '@/features/admin/AdminAuthContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { supabaseEnabled } from '@/services/supabase/client';
 
 /** Only allow redirects back into the admin area (prevents open redirects). */
 export function safeAdminRedirect(next: string | null): string {
@@ -91,7 +92,7 @@ export function AdminLoginPage() {
           <p className="text-center text-xs text-muted">{t.admin.login.noSignup}</p>
         </form>
 
-        {import.meta.env.DEV && (
+        {import.meta.env.DEV && !supabaseEnabled && (
           <p className="mt-4 flex items-start gap-2 border border-dashed border-clay/50 bg-sand/40 p-3 text-xs text-ink-soft">
             <FlaskConical size={14} className="mt-0.5 shrink-0 text-clay" />
             <span>

@@ -9,6 +9,7 @@ import { useAdminProducts } from '@/hooks/useAdminProducts';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { adminProducts } from '@/services/catalog';
 import { localProductStore } from '@/services/catalog/mock/localProductStore';
+import { supabaseEnabled } from '@/services/supabase/client';
 import { CATEGORIES } from '@/data/mock/taxonomy';
 import { productsToCsv } from '@/features/csv/productCsv';
 import { downloadTextFile } from '@/features/csv/csv';
@@ -228,7 +229,7 @@ export function ProductsListPage() {
         )}
       </Panel>
 
-      {import.meta.env.DEV && (
+      {import.meta.env.DEV && !supabaseEnabled && (
         <button type="button" onClick={resetDemo} className="mt-4 text-xs text-muted underline underline-offset-4 hover:text-ink">
           {tp.resetDemo}
         </button>

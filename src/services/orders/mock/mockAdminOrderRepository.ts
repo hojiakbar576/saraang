@@ -3,7 +3,8 @@ import type { Order } from '@/types/order';
 import { applyAmountCorrection, applyNote, applyStatusChange, type StatusChangeError } from '@/features/orders/statusFlow';
 import { localOrderStore } from './localOrderStore';
 
-export const ORDERS_CHANGED_EVENT = 'store:orders-changed';
+import { ORDERS_CHANGED_EVENT } from '@/services/events';
+export { ORDERS_CHANGED_EVENT };
 
 const ctx = () => ({ now: new Date().toISOString(), newId: () => crypto.randomUUID() });
 

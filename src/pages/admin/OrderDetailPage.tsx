@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Price, Skeleton } from '@/components/ui/primitives';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { adminOrders } from '@/services/orders';
-import { ORDERS_CHANGED_EVENT } from '@/services/orders/mock/mockAdminOrderRepository';
+import { ORDERS_CHANGED_EVENT } from '@/services/events';
 import { NEXT_STEP, TRANSITIONS, MAX_NOTE_LENGTH } from '@/features/orders/statusFlow';
 import { formatDateTime } from '@/lib/date';
 import { formatUzPhone } from '@/lib/phone';
