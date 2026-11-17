@@ -52,10 +52,12 @@ export function HomePage() {
       </section>
 
       {/* Featured */}
-      <Container className="pt-16 sm:pt-24">
-        <SectionHeading eyebrow={brand.name} title={t.home.featured} action={<ViewAll to="/search" />} />
-        <ProductGrid products={featured} loading={loading} skeletonCount={4} />
-      </Container>
+      {(loading || (featured && featured.length > 0)) && (
+        <Container className="pt-16 sm:pt-24">
+          <SectionHeading eyebrow={brand.name} title={t.home.featured} action={<ViewAll to="/search" />} />
+          <ProductGrid products={featured} loading={loading} skeletonCount={4} />
+        </Container>
+      )}
 
       {/* Categories */}
       <Container className="pt-16 sm:pt-24">
@@ -84,10 +86,12 @@ export function HomePage() {
       </Container>
 
       {/* New arrivals */}
-      <Container className="pt-16 sm:pt-24">
-        <SectionHeading eyebrow={t.home.heroEyebrow} title={t.home.newArrivals} action={<ViewAll to="/new" />} />
-        <ProductGrid products={newest} loading={loading} skeletonCount={4} />
-      </Container>
+      {(loading || (newest && newest.length > 0)) && (
+        <Container className="pt-16 sm:pt-24">
+          <SectionHeading eyebrow={t.home.heroEyebrow} title={t.home.newArrivals} action={<ViewAll to="/new" />} />
+          <ProductGrid products={newest} loading={loading} skeletonCount={4} />
+        </Container>
+      )}
 
       {/* Brand intro */}
       <section className="mt-16 bg-sand/60 sm:mt-24">

@@ -143,7 +143,7 @@ describe('admin product repository', () => {
 
 describe('CSV', () => {
   it('parses quotes, escaped quotes, embedded newlines, CRLF and BOM', () => {
-    const text = '﻿a,b,c\r\n"x, y","he said ""hi""","line1\nline2"\r\n\r\n1,2,3';
+    const text = '\uFEFFa,b,c\r\n"x, y","he said ""hi""","line1\nline2"\r\n\r\n1,2,3';
     expect(parseCsv(text)).toEqual([
       ['a', 'b', 'c'],
       ['x, y', 'he said "hi"', 'line1\nline2'],

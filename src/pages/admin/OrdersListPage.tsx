@@ -23,7 +23,11 @@ export function OrdersListPage() {
   const [params, setParams] = useSearchParams();
 
   const query = params.get('q') ?? '';
-  const statuses = (params.get('status')?.split(',').filter((s) => (ORDER_STATUSES as readonly string[]).includes(s)) ?? []) as OrderStatus[];
+  const statusParam = params.get('status');
+  const statuses = useMemo(
+    () => (statusParam?.split(',').filter((s) => (ORDER_STATUSES as readonly string[]).includes(s)) ?? []) as OrderStatus[],
+    [statusParam],
+  );
   const preset = (params.get('period') as RangePreset | null) ?? 'all';
   const fromInput = params.get('from') ?? '';
   const toInput = params.get('to') ?? '';

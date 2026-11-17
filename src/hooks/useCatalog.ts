@@ -21,6 +21,8 @@ function useAsync<T>(load: () => Promise<T>, deps: unknown[]): AsyncState<T> {
     return () => {
       cancelled = true;
     };
+    // `deps` is the caller's dependency list for `load` (same contract as useEffect).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
   return state;
 }

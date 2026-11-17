@@ -84,7 +84,7 @@ export function toCsv(rows: (string | number | boolean | null | undefined)[][], 
     return /["\r\n]/.test(s) || s.includes(delimiter) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   // BOM so Excel opens UTF-8 (Uzbek characters) correctly.
-  return '﻿' + rows.map((r) => r.map(escape).join(delimiter)).join('\r\n') + '\r\n';
+  return '\uFEFF' + rows.map((r) => r.map(escape).join(delimiter)).join('\r\n') + '\r\n';
 }
 
 export function downloadTextFile(filename: string, content: string, mime = 'text/csv;charset=utf-8') {

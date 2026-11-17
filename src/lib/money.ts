@@ -13,8 +13,8 @@ export function assertValidAmount(amount: number): asserts amount is UZS {
 export function formatUZS(amount: UZS, withCurrency = true): string {
   const sign = amount < 0 ? '-' : '';
   const digits = Math.abs(Math.trunc(amount)).toString();
-  const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-  return withCurrency ? `${sign}${grouped} soʻm` : `${sign}${grouped}`;
+  const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00A0');
+  return withCurrency ? `${sign}${grouped}\u00A0soʻm` : `${sign}${grouped}`;
 }
 
 export function multiply(price: UZS, quantity: number): UZS {

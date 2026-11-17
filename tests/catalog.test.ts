@@ -114,7 +114,7 @@ describe('collection filters', () => {
 
 describe('money', () => {
   it('formats UZS with grouped thousands', () => {
-    expect(formatUZS(1_290_000)).toBe('1 290 000 soʻm');
+    expect(formatUZS(1_290_000)).toBe('1\u00A0290\u00A0000\u00A0soʻm');
     expect(formatUZS(0, false)).toBe('0');
   });
 

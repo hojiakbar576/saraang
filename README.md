@@ -10,15 +10,21 @@ Tashkent-based clothing pre-order business. Brand name and contacts live in
 npm install
 npm run dev        # http://localhost:5173
 npm test           # unit + component tests
+npm run lint       # ESLint
 npm run build      # type-check + production build
 ```
 
-## Current status — Phase 1 (local mock data, no backend)
+## Current status — Phase 1 complete, awaiting review
+
+Milestones 1–6 (storefront, cart & checkout, admin auth mock & dashboard, product
+management, order management, analytics) are built on local demo data.
+See **docs/REVIEW.md** for the review script and the decisions needed before
+Phase 2 (Supabase). Nothing is connected to a backend yet.
 
 - Product data and images are **demo placeholders** (`src/data/mock/`), marked "DEMO".
-- The cart is stored in the browser (localStorage). No orders are sent anywhere yet.
-- The data layer goes through `src/services/catalog` so Supabase can replace the mock
-  implementation in Phase 2 without touching the pages.
+- Products are stored in this browser's IndexedDB; cart/orders in localStorage.
+- Admin login is a development-only mock (`.env.development.local`), disabled in production builds.
+- All data access goes through `src/services/*` interfaces so Supabase can replace the mocks.
 
 ## Structure
 

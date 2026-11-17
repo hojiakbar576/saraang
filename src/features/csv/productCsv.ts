@@ -69,7 +69,7 @@ function parseBool(v: string, field: string, errors: string[]): boolean {
 
 function parsePrice(v: string, errors: string[]): number {
   const s = v.trim().replace(/\s*(so[ʻ'‘’`]?m|sum|uzs)$/i, '');
-  if (!/^\d{1,3}([ ,.  ]\d{3})*$|^\d+$/.test(s)) {
+  if (!/^\d{1,3}([ ,.\u00A0\u202F]\d{3})*$|^\d+$/.test(s)) {
     errors.push(`Narx notoʻgʻri: "${v}". Butun son kiriting, masalan 349000.`);
     return 0;
   }

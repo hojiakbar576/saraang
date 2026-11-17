@@ -86,12 +86,17 @@ export function ProductFormPage() {
   const [message, setMessage] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
   const [customSize, setCustomSize] = useState('');
   const skipBlock = useRef(false);
+  /** Form prepared by "save & add another"; survives the URL change from ?from=… to /new. */
+  const pendingNext = useRef<ProductInput | null>(null);
 
   useEffect(() => {
     let active = true;
     (async () => {
       let next: ProductInput = { ...DEFAULT_PRODUCT_INPUT };
-      if (mode === 'edit' && id) {
+      if (pendingNext.current) {
+        next = pendingNext.current;
+        pendingNext.current = null;
+      } else if (mode === 'edit' && id) {
         const p = await adminProducts.getProduct(id);
         if (!active) return;
         if (!p) return setNotFound(true);
@@ -184,6 +189,7 @@ export function ProductFormPage() {
         colorIds: form.colorIds,
         deliveryEstimate: form.deliveryEstimate,
       };
+      if (mode !== 'create') pendingNext.current = next;
       setForm(next);
       setInitial(JSON.stringify(next));
       setSlugTouched(false);

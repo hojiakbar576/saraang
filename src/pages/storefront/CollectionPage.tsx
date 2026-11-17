@@ -47,12 +47,20 @@ export function CollectionPage({ scope }: { scope: CollectionScope }) {
 
   const update = (next: ProductFilters) => setParams(filtersToParams(next), { replace: true, preventScrollReset: true });
 
-  // Debounce the search box into the URL.
+  // Debounce the search box into the URL. Reads the latest params when it fires,
+  // so a filter changed during the delay is not overwritten.
   useEffect(() => {
-    if (queryInput === filters.query) return;
-    const id = setTimeout(() => update({ ...filters, query: queryInput.trim() }), 250);
+    if (queryInput.trim() === filters.query) return;
+    const id = setTimeout(
+      () =>
+        setParams((prev) => filtersToParams({ ...filtersFromParams(prev), query: queryInput.trim() }), {
+          replace: true,
+          preventScrollReset: true,
+        }),
+      250,
+    );
     return () => clearTimeout(id);
-  }, [queryInput]);
+  }, [queryInput, filters.query, setParams]);
 
   const scoped = useMemo(() => products?.filter((p) => inScope(p, scope)), [products, scope]);
   const results = useMemo(() => scoped && applyFilters(scoped, filters), [scoped, filters]);
