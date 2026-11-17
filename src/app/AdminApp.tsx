@@ -3,13 +3,13 @@ import { AdminAuthProvider, RequireAdmin } from '@/features/admin/AdminAuthConte
 import { AdminLayout } from '@/layouts/AdminLayout';
 import { AdminLoginPage } from '@/pages/admin/AdminLoginPage';
 import { DashboardPage } from '@/pages/admin/DashboardPage';
-import { ComingSoonPage, SettingsPage } from '@/pages/admin/SectionPages';
+import { SettingsPage } from '@/pages/admin/SectionPages';
+import { AnalyticsPage } from '@/pages/admin/AnalyticsPage';
 import { ProductsListPage } from '@/pages/admin/ProductsListPage';
 import { ProductFormPage } from '@/pages/admin/ProductFormPage';
 import { ProductImportPage } from '@/pages/admin/ProductImportPage';
 import { OrdersListPage } from '@/pages/admin/OrdersListPage';
 import { OrderDetailPage } from '@/pages/admin/OrderDetailPage';
-import { t } from '@/i18n';
 
 /**
  * Admin area (mounted at /admin/*). Loaded as a separate chunk so customers never
@@ -35,7 +35,7 @@ export function AdminApp() {
           <Route path="products/:id/edit" element={<ProductFormPage />} />
           <Route path="orders" element={<OrdersListPage />} />
           <Route path="orders/:id" element={<OrderDetailPage />} />
-          <Route path="analytics" element={<ComingSoonPage title={t.admin.nav.analytics} description={t.admin.comingSoon.analytics} />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Route>

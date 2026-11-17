@@ -1,4 +1,5 @@
 import type { UZS } from '@/lib/money';
+import type { CategoryId } from '@/types/catalog';
 
 export const ORDER_STATUSES = [
   'new',
@@ -31,6 +32,8 @@ export interface OrderItem {
   variantId: string;
   productName: string;
   productSlug: string;
+  /** Category at order time (for analytics). Optional for orders created before it was recorded. */
+  categoryId?: CategoryId;
   size: string;
   colorId: string;
   colorName: string;

@@ -1,28 +1,11 @@
 import { useState } from 'react';
-import { Check, Construction, Trash2 } from 'lucide-react';
+import { Check, Trash2 } from 'lucide-react';
 import { brand } from '@/config/brand';
 import { t } from '@/i18n';
 import { PageHeader, Panel } from '@/components/admin/AdminUI';
 import { Button } from '@/components/ui/Button';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { adminOrders } from '@/services/orders';
-
-/** Honest placeholder for admin sections built in later milestones. */
-export function ComingSoonPage({ title, description }: { title: string; description: string }) {
-  usePageTitle(title);
-  return (
-    <>
-      <PageHeader title={title} />
-      <Panel>
-        <div className="flex flex-col items-center px-6 py-16 text-center">
-          <Construction size={30} strokeWidth={1.25} className="text-muted" />
-          <p className="display mt-4 text-2xl">{t.admin.comingSoon.title}</p>
-          <p className="mt-2 max-w-md text-sm text-muted">{description}</p>
-        </div>
-      </Panel>
-    </>
-  );
-}
 
 export function SettingsPage() {
   const s = t.admin.settings;

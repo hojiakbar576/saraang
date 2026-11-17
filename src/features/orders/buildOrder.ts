@@ -60,6 +60,7 @@ export function buildOrder(
       variantId: variant.id,
       productName: product.name,
       productSlug: product.slug,
+      categoryId: product.categoryId,
       size: variant.size,
       colorId: color.id,
       colorName: color.name,
