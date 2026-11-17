@@ -4,6 +4,9 @@ import { AdminLayout } from '@/layouts/AdminLayout';
 import { AdminLoginPage } from '@/pages/admin/AdminLoginPage';
 import { DashboardPage } from '@/pages/admin/DashboardPage';
 import { ComingSoonPage, SettingsPage } from '@/pages/admin/SectionPages';
+import { ProductsListPage } from '@/pages/admin/ProductsListPage';
+import { ProductFormPage } from '@/pages/admin/ProductFormPage';
+import { ProductImportPage } from '@/pages/admin/ProductImportPage';
 import { t } from '@/i18n';
 
 /**
@@ -24,7 +27,10 @@ export function AdminApp() {
           }
         >
           <Route index element={<DashboardPage />} />
-          <Route path="products" element={<ComingSoonPage title={t.admin.nav.products} description={t.admin.comingSoon.products} />} />
+          <Route path="products" element={<ProductsListPage />} />
+          <Route path="products/new" element={<ProductFormPage />} />
+          <Route path="products/import" element={<ProductImportPage />} />
+          <Route path="products/:id/edit" element={<ProductFormPage />} />
           <Route path="orders" element={<ComingSoonPage title={t.admin.nav.orders} description={t.admin.comingSoon.orders} />} />
           <Route path="analytics" element={<ComingSoonPage title={t.admin.nav.analytics} description={t.admin.comingSoon.analytics} />} />
           <Route path="settings" element={<SettingsPage />} />

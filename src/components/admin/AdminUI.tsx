@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { OrderStatus } from '@/types/order';
+import type { ProductStatus } from '@/types/catalog';
 import { t } from '@/i18n';
 import { cn } from '@/lib/cn';
 
@@ -48,6 +49,46 @@ const STATUS_STYLE: Record<OrderStatus, string> = {
   delivered: 'bg-[#dcebdf] text-success',
   cancelled: 'bg-[#f1e1dd] text-danger',
 };
+
+const PRODUCT_STATUS_STYLE: Record<ProductStatus, string> = {
+  active: 'bg-[#dcebdf] text-success',
+  inactive: 'bg-sand text-ink-soft',
+  archived: 'bg-mist text-muted',
+};
+
+export function ProductStatusBadge({ status }: { status: ProductStatus }) {
+  return (
+    <span className={cn('inline-flex items-center px-2 py-0.5 text-[11px] font-medium whitespace-nowrap', PRODUCT_STATUS_STYLE[status])}>
+      {t.admin.products.status[status]}
+    </span>
+  );
+}
+
+export function Notice({ tone = 'info', children, onClose }: { tone?: 'info' | 'success' | 'error'; children: ReactNode; onClose?: () => void }) {
+  return (
+    <div
+      role={tone === 'error' ? 'alert' : 'status'}
+      className={cn(
+        'mb-4 flex items-start justify-between gap-3 border px-4 py-3 text-sm',
+        tone === 'success' && 'border-success/30 bg-success/5 text-success',
+        tone === 'error' && 'border-danger/30 bg-danger/5 text-danger',
+        tone === 'info' && 'border-line bg-paper text-ink-soft',
+      )}
+    >
+      <div className="min-w-0">{children}</div>
+      {onClose && (
+        <button type="button" onClick={onClose} className="-mr-1 shrink-0 px-1 opacity-60 hover:opacity-100" aria-label="Yopish">
+          ×
+        </button>
+      )}
+    </div>
+  );
+}
+
+export const adminSelect =
+  'h-10 border border-line bg-paper px-3 text-sm focus:border-ink focus:outline-none hover:border-stone cursor-pointer';
+export const adminInput =
+  'h-10 border border-line bg-paper px-3 text-sm placeholder:text-muted/60 focus:border-ink focus:outline-none hover:border-stone';
 
 export function StatusBadge({ status }: { status: OrderStatus }) {
   return (

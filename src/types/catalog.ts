@@ -31,6 +31,8 @@ export interface ProductImage {
   alt: string;
   /** 0 = primary image. */
   position: number;
+  /** Provider-specific path used to delete the file (null for external URLs / demo images). */
+  storagePath?: string | null;
 }
 
 /** One sellable size × colour combination. */

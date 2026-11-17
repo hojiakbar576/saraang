@@ -1,6 +1,13 @@
 import type { CatalogRepository } from './CatalogRepository';
+import type { AdminProductRepository } from './AdminProductRepository';
 import { mockCatalogRepository } from './mock/mockCatalogRepository';
+import { mockAdminProductRepository } from './mock/mockAdminProductRepository';
 
-/** The active catalog implementation. Phase 2: return the Supabase repository here. */
+/** Public catalog (active products only). Phase 2: Supabase implementation. */
 export const catalog: CatalogRepository = mockCatalogRepository;
-export type { CatalogRepository };
+
+/** Admin product management. Phase 2: Supabase implementation protected by RLS. */
+export const adminProducts: AdminProductRepository = mockAdminProductRepository;
+
+export type { CatalogRepository, AdminProductRepository };
+export type { SaveProductResult, DeleteProductResult } from './AdminProductRepository';
