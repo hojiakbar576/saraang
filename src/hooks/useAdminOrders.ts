@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { adminOrders } from '@/services/orders';
+import { ORDERS_CHANGED_EVENT } from '@/services/orders/mock/mockAdminOrderRepository';
 import type { Order } from '@/types/order';
 
 export function useAdminOrders() {
@@ -20,7 +21,11 @@ export function useAdminOrders() {
     // Pick up orders placed in another tab (mock storage).
     const onStorage = () => reload();
     window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    window.addEventListener(ORDERS_CHANGED_EVENT, onStorage);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener(ORDERS_CHANGED_EVENT, onStorage);
+    };
   }, [reload]);
 
   return { orders, loading: orders === undefined && !error, error, reload };

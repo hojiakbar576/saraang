@@ -7,6 +7,8 @@ import { ComingSoonPage, SettingsPage } from '@/pages/admin/SectionPages';
 import { ProductsListPage } from '@/pages/admin/ProductsListPage';
 import { ProductFormPage } from '@/pages/admin/ProductFormPage';
 import { ProductImportPage } from '@/pages/admin/ProductImportPage';
+import { OrdersListPage } from '@/pages/admin/OrdersListPage';
+import { OrderDetailPage } from '@/pages/admin/OrderDetailPage';
 import { t } from '@/i18n';
 
 /**
@@ -31,7 +33,8 @@ export function AdminApp() {
           <Route path="products/new" element={<ProductFormPage />} />
           <Route path="products/import" element={<ProductImportPage />} />
           <Route path="products/:id/edit" element={<ProductFormPage />} />
-          <Route path="orders" element={<ComingSoonPage title={t.admin.nav.orders} description={t.admin.comingSoon.orders} />} />
+          <Route path="orders" element={<OrdersListPage />} />
+          <Route path="orders/:id" element={<OrderDetailPage />} />
           <Route path="analytics" element={<ComingSoonPage title={t.admin.nav.analytics} description={t.admin.comingSoon.analytics} />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />

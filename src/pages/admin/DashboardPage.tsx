@@ -91,7 +91,7 @@ export function DashboardPage() {
                 {recent.map((o) => (
                   <li key={o.id} className="flex items-start justify-between gap-3 px-5 py-4 text-sm">
                     <div className="min-w-0">
-                      <p className="font-medium tabular-nums">{o.orderNumber}</p>
+                      <Link to={`/admin/orders/${o.id}`} className="font-medium tabular-nums hover:underline">{o.orderNumber}</Link>
                       <p className="truncate text-muted">{o.customer.fullName}</p>
                       <p className="text-xs text-muted">{formatDateTime(o.createdAt)}</p>
                     </div>
@@ -117,7 +117,9 @@ export function DashboardPage() {
                   <tbody className="divide-y divide-line">
                     {recent.map((o) => (
                       <tr key={o.id} className="hover:bg-mist/60">
-                        <td className="px-5 py-3 font-medium tabular-nums">{o.orderNumber}</td>
+                        <td className="px-5 py-3 font-medium tabular-nums">
+                          <Link to={`/admin/orders/${o.id}`} className="hover:underline">{o.orderNumber}</Link>
+                        </td>
                         <td className="px-5 py-3">
                           <p>{o.customer.fullName}</p>
                           <p className="text-xs text-muted tabular-nums">{formatUzPhone(o.customer.phone)}</p>
