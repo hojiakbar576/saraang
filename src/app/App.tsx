@@ -27,7 +27,11 @@ const router = createBrowserRouter([
       { path: '*', element: <NotFoundPage /> },
     ],
   },
-  // Admin routes (/admin/*) are added in Milestone 3 under a separate layout.
+  {
+    path: 'admin/*',
+    // Admin code is split into its own chunk and loaded only when /admin is visited.
+    lazy: async () => ({ Component: (await import('./AdminApp')).AdminApp }),
+  },
 ]);
 
 export function App() {
