@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { Check, Info, PackageX, Truck } from 'lucide-react';
-import { t } from '@/i18n';
+import { useTranslation } from 'react-i18next';
 import { Container, EmptyState, Price, SectionHeading, Skeleton } from '@/components/ui/primitives';
 import { Button, ButtonLink } from '@/components/ui/Button';
 import { ImageGallery } from '@/components/storefront/ImageGallery';
@@ -13,6 +13,7 @@ import { hasAnyAvailableVariant, initialSelection, isVariantAvailable } from '@/
 import { useCart } from '@/features/cart/CartContext';
 import { MAX_LINE_QUANTITY } from '@/features/cart/cart';
 import type { Product } from '@/types/catalog';
+import { productDescription, productName, taxonomyName } from '@/i18n/content';
 
 function relatedTo(product: Product, all: Product[]): Product[] {
   const others = all.filter((p) => p.id !== product.id && (p.gender === product.gender || p.gender === 'unisex' || product.gender === 'unisex'));
@@ -36,12 +37,13 @@ function ProductSkeleton() {
 }
 
 export function ProductPage() {
+  const { t } = useTranslation();
   const { slug } = useParams();
   const { data: product, loading } = useProductBySlug(slug);
   const { data: all } = useActiveProducts();
   const { data: tax } = useTaxonomy();
   const { dispatch } = useCart();
-  usePageTitle(product?.name);
+  usePageTitle(product ? productName(product) : undefined);
 
   const [colorId, setColorId] = useState<string | null>(null);
   const [size, setSize] = useState<string | null>(null);
@@ -68,9 +70,9 @@ export function ProductPage() {
       <Container className="pt-16">
         <EmptyState
           icon={<PackageX size={28} strokeWidth={1.25} />}
-          title={t.product.notFoundTitle}
-          text={t.product.notFoundText}
-          action={<ButtonLink to="/">{t.common.backToShop}</ButtonLink>}
+          title={t('product.notFoundTitle')}
+          text={t('product.notFoundText')}
+          action={<ButtonLink to="/">{t('common.backToShop')}</ButtonLink>}
         />
       </Container>
     );
@@ -98,23 +100,23 @@ export function ProductPage() {
     <>
       <Container className="pt-4 lg:pt-8">
         <nav aria-label="Breadcrumb" className="mb-4 hidden text-xs text-muted sm:block lg:mb-6">
-          <Link to="/" className="hover:text-ink">{t.nav.home}</Link>
+          <Link to="/" className="hover:text-ink">{t('nav.home')}</Link>
           <span className="mx-2">/</span>
-          <Link to={collectionPath} className="hover:text-ink">{t.gender[product.gender === 'women' ? 'women' : 'men']}</Link>
+          <Link to={collectionPath} className="hover:text-ink">{t(`gender.${product.gender === 'women' ? 'women' : 'men'}`)}</Link>
           {category && (
             <>
               <span className="mx-2">/</span>
-              <Link to={`${collectionPath}?cat=${category.id}`} className="hover:text-ink">{category.name}</Link>
+              <Link to={`${collectionPath}?cat=${category.id}`} className="hover:text-ink">{taxonomyName(category)}</Link>
             </>
           )}
         </nav>
 
         <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:gap-16">
-          <ImageGallery images={product.images} />
+          <ImageGallery images={product.images} name={productName(product)} />
 
           <div className="lg:sticky lg:top-28 lg:self-start">
-            {category && <p className="eyebrow mb-3">{category.name}</p>}
-            <h1 className="display text-4xl leading-tight sm:text-5xl">{product.name}</h1>
+            {category && <p className="eyebrow mb-3">{taxonomyName(category)}</p>}
+            <h1 className="display text-4xl leading-tight sm:text-5xl">{productName(product)}</h1>
             <Price amount={product.price} className="mt-3 block text-lg" />
 
             <div className="mt-8">
@@ -135,12 +137,12 @@ export function ProductPage() {
             </div>
 
             {soldOut ? (
-              <p className="mt-8 border border-line bg-mist px-4 py-3 text-sm text-muted">{t.product.soldOut}</p>
+              <p className="mt-8 border border-line bg-mist px-4 py-3 text-sm text-muted">{t('product.soldOut')}</p>
             ) : (
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <QuantityStepper value={quantity} onChange={setQuantity} max={MAX_LINE_QUANTITY} />
                 <Button size="lg" className="w-full sm:w-auto sm:flex-1" onClick={addToCart}>
-                  {t.product.addToCart}
+                  {t('product.addToCart')}
                 </Button>
               </div>
             )}
@@ -148,9 +150,9 @@ export function ProductPage() {
             {added && (
               <div role="status" className="animate-fade-in mt-3 flex items-center justify-between gap-3 border border-success/30 bg-success/5 px-4 py-3 text-sm">
                 <span className="flex items-center gap-2 text-success">
-                  <Check size={16} /> {t.product.added}
+                  <Check size={16} /> {t('product.added')}
                 </span>
-                <Link to="/cart" className="text-ink underline underline-offset-4">{t.product.viewCart}</Link>
+                <Link to="/cart" className="text-ink underline underline-offset-4">{t('product.viewCart')}</Link>
               </div>
             )}
 
@@ -158,19 +160,19 @@ export function ProductPage() {
               <div className="flex gap-3">
                 <Truck size={18} strokeWidth={1.5} className="mt-0.5 shrink-0 text-muted" />
                 <div>
-                  <p className="font-medium">{t.product.delivery}</p>
-                  <p className="text-muted">{t.product.deliveryEstimate(product.deliveryEstimate.minDays, product.deliveryEstimate.maxDays)}</p>
+                  <p className="font-medium">{t('product.delivery')}</p>
+                  <p className="text-muted">{t('product.deliveryEstimate', { min: product.deliveryEstimate.minDays, max: product.deliveryEstimate.maxDays })}</p>
                 </div>
               </div>
               <div className="flex gap-3">
                 <Info size={18} strokeWidth={1.5} className="mt-0.5 shrink-0 text-muted" />
-                <p className="leading-relaxed text-muted">{t.preorder.productNote}</p>
+                <p className="leading-relaxed text-muted">{t('preorder.productNote')}</p>
               </div>
             </div>
 
             <div className="mt-8 border-t border-line pt-6">
-              <h2 className="mb-3 text-sm font-medium">{t.product.description}</h2>
-              <p className="text-sm leading-relaxed whitespace-pre-line text-ink-soft">{product.description}</p>
+              <h2 className="mb-3 text-sm font-medium">{t('product.description')}</h2>
+              <p className="text-sm leading-relaxed whitespace-pre-line text-ink-soft">{productDescription(product)}</p>
             </div>
           </div>
         </div>
@@ -178,7 +180,7 @@ export function ProductPage() {
 
       {related && related.length > 0 && (
         <Container className="pt-20 sm:pt-28">
-          <SectionHeading title={t.product.related} />
+          <SectionHeading title={t('product.related')} />
           <ProductGrid products={related} skeletonCount={4} />
         </Container>
       )}

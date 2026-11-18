@@ -2,9 +2,12 @@ import type { ReactNode } from 'react';
 import { Check } from 'lucide-react';
 import type { Category, CategoryId, Color, Gender } from '@/types/catalog';
 import type { ProductFilters } from '@/features/products/filters';
+import { useTranslation } from 'react-i18next';
 import { t } from '@/i18n';
 import { cn } from '@/lib/cn';
 import { formatUZS } from '@/lib/money';
+import { sizeLabel, taxonomyName } from '@/i18n/content';
+import { currencyLabel } from '@/lib/money';
 
 export interface FilterOptions {
   categories: Category[];
@@ -22,8 +25,8 @@ export const PRICE_RANGES: { min: number | null; max: number | null }[] = [
 
 function priceLabel(r: { min: number | null; max: number | null }) {
   const n = (v: number) => formatUZS(v, false);
-  if (r.min == null && r.max != null) return `${n(r.max + 1)} ${t.collection.priceMax.toLowerCase()}`;
-  if (r.max == null && r.min != null) return `${n(r.min)} ${t.collection.priceMin.toLowerCase()}`;
+  if (r.min == null && r.max != null) return `${n(r.max + 1)} ${t('collection.priceMax').toLowerCase()}`;
+  if (r.max == null && r.min != null) return `${n(r.min)} ${t('collection.priceMin').toLowerCase()}`;
   return `${n(r.min ?? 0)} – ${n((r.max ?? 0) + 1)}`;
 }
 
@@ -50,12 +53,13 @@ interface Props {
 }
 
 export function FilterPanel({ filters, options, onChange }: Props) {
+  const { t } = useTranslation();
   const set = (patch: Partial<ProductFilters>) => onChange({ ...filters, ...patch });
 
   return (
     <div>
       {options.categories.length > 1 && (
-        <Group title={t.collection.category}>
+        <Group title={t('collection.category')}>
           <ul className="space-y-1">
             {options.categories.map((c) => {
               const checked = filters.categoryIds.includes(c.id);
@@ -76,7 +80,7 @@ export function FilterPanel({ filters, options, onChange }: Props) {
                     >
                       {checked && <Check size={12} strokeWidth={2} />}
                     </span>
-                    <span className={checked ? 'text-ink' : 'text-ink-soft'}>{c.name}</span>
+                    <span className={checked ? 'text-ink' : 'text-ink-soft'}>{taxonomyName(c)}</span>
                   </label>
                 </li>
               );
@@ -86,7 +90,7 @@ export function FilterPanel({ filters, options, onChange }: Props) {
       )}
 
       {options.genders.length > 1 && (
-        <Group title={t.collection.gender}>
+        <Group title={t('collection.gender')}>
           <div className="flex flex-wrap gap-2">
             {options.genders.map((g) => (
               <button
@@ -96,7 +100,7 @@ export function FilterPanel({ filters, options, onChange }: Props) {
                 className={chip}
                 onClick={() => set({ genders: toggle(filters.genders, g) })}
               >
-                {t.gender[g]}
+                {t(`gender.${g}`)}
               </button>
             ))}
           </div>
@@ -104,7 +108,7 @@ export function FilterPanel({ filters, options, onChange }: Props) {
       )}
 
       {options.sizes.length > 0 && (
-        <Group title={t.collection.size}>
+        <Group title={t('collection.size')}>
           <div className="flex flex-wrap gap-2">
             {options.sizes.map((s) => (
               <button
@@ -114,7 +118,7 @@ export function FilterPanel({ filters, options, onChange }: Props) {
                 className={cn(chip, 'min-w-11')}
                 onClick={() => set({ sizes: toggle(filters.sizes, s) })}
               >
-                {s}
+                {sizeLabel(s)}
               </button>
             ))}
           </div>
@@ -122,7 +126,7 @@ export function FilterPanel({ filters, options, onChange }: Props) {
       )}
 
       {options.colors.length > 0 && (
-        <Group title={t.collection.color}>
+        <Group title={t('collection.color')}>
           <div className="flex flex-wrap gap-x-4 gap-y-3">
             {options.colors.map((c) => {
               const active = filters.colorIds.includes(c.id);
@@ -141,7 +145,7 @@ export function FilterPanel({ filters, options, onChange }: Props) {
                     )}
                     style={{ backgroundColor: c.hex }}
                   />
-                  <span className={active ? 'text-ink' : undefined}>{c.name}</span>
+                  <span className={active ? 'text-ink' : undefined}>{taxonomyName(c)}</span>
                 </button>
               );
             })}
@@ -149,7 +153,7 @@ export function FilterPanel({ filters, options, onChange }: Props) {
         </Group>
       )}
 
-      <Group title={t.collection.price}>
+      <Group title={t('collection.price')}>
         <div className="flex flex-col gap-2">
           {PRICE_RANGES.map((r) => {
             const active = filters.minPrice === r.min && filters.maxPrice === r.max;
@@ -161,7 +165,7 @@ export function FilterPanel({ filters, options, onChange }: Props) {
                 className={cn(chip, 'justify-start tabular-nums')}
                 onClick={() => set(active ? { minPrice: null, maxPrice: null } : { minPrice: r.min, maxPrice: r.max })}
               >
-                {priceLabel(r)} soʻm
+                {priceLabel(r)} {currencyLabel()}
               </button>
             );
           })}

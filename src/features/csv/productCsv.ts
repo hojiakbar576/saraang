@@ -2,12 +2,17 @@ import type { Category, Color, Gender, Product, ProductStatus } from '@/types/ca
 import { restoreFormula, toCsv } from './csv';
 import { slugify, uniqueSlug } from '@/features/products/admin/slug';
 import { baseFilename, validateImageFile, IMAGE_ERROR_TEXT } from '@/features/products/admin/images';
-import { DEFAULT_PRODUCT_INPUT, validateProductInput, variantKey, type ProductInput } from '@/features/products/admin/productInput';
+import { DEFAULT_PRODUCT_INPUT, emptyTranslations, validateProductInput, variantKey, type ProductInput } from '@/features/products/admin/productInput';
+import { msg } from '@/i18n';
 
 export const CSV_COLUMNS = [
   'name',
   'slug',
   'description',
+  'name_ru',
+  'description_ru',
+  'name_en',
+  'description_en',
   'price',
   'category',
   'gender',
@@ -29,7 +34,7 @@ type Column = (typeof CSV_COLUMNS)[number];
 export type ImageRef = { kind: 'url'; url: string } | { kind: 'file'; file: File };
 
 export interface CsvRowResult {
-  /** Line number in the spreadsheet (header = 1). */
+  /** Line number in the spreadsheet (header = 1). Errors and warnings are message codes (translateMsg). */
   rowNumber: number;
   name: string;
   input: ProductInput | null;
@@ -63,14 +68,14 @@ function parseBool(v: string, field: string, errors: string[]): boolean {
   const n = norm(v);
   if (TRUE.has(n)) return true;
   if (FALSE.has(n)) return false;
-  errors.push(`"${field}" ustuni: "${v}" — "ha" yoki "yoʻq" (yes/no) kiriting.`);
+  errors.push(msg('csv.boolInvalid', { field, value: v }));
   return false;
 }
 
 function parsePrice(v: string, errors: string[]): number {
   const s = v.trim().replace(/\s*(so[ʻ'‘’`]?m|sum|uzs)$/i, '');
   if (!/^\d{1,3}([ ,.\u00A0\u202F]\d{3})*$|^\d+$/.test(s)) {
-    errors.push(`Narx notoʻgʻri: "${v}". Butun son kiriting, masalan 349000.`);
+    errors.push(msg('csv.priceInvalid', { value: v }));
     return 0;
   }
   return Number(s.replace(/\D/g, ''));
@@ -80,7 +85,7 @@ function parseInt0(v: string, field: string, fallback: number, errors: string[])
   if (!v.trim()) return fallback;
   const n = Number(v.trim());
   if (!Number.isInteger(n)) {
-    errors.push(`"${field}" butun son boʻlsin: "${v}".`);
+    errors.push(msg('csv.intInvalid', { field, value: v }));
     return fallback;
   }
   return n;
@@ -100,14 +105,14 @@ const STATUSES: Record<string, ProductStatus> = {
 export function parseProductCsv(rows: string[][], ctx: CsvContext): CsvParseResult {
   const fileErrors: string[] = [];
   const fileWarnings: string[] = [];
-  if (rows.length === 0) return { fileErrors: ['Fayl boʻsh.'], fileWarnings, rows: [] };
+  if (rows.length === 0) return { fileErrors: [msg('csv.fileEmpty')], fileWarnings, rows: [] };
 
   const header = rows[0].map((h) => norm(h).replace(/\s+/g, '_'));
   const missing = REQUIRED_COLUMNS.filter((c) => !header.includes(c));
-  if (missing.length) fileErrors.push(`Majburiy ustunlar yoʻq: ${missing.join(', ')}. Shablonni yuklab oling.`);
+  if (missing.length) fileErrors.push(msg('csv.missingColumns', { columns: missing.join(', ') }));
   const unknown = header.filter((h) => h && !(CSV_COLUMNS as readonly string[]).includes(h));
-  if (unknown.length) fileWarnings.push(`Nomaʼlum ustunlar eʼtiborsiz qoldirildi: ${unknown.join(', ')}.`);
-  if (rows.length === 1) fileErrors.push('Faylda mahsulot qatorlari yoʻq.');
+  if (unknown.length) fileWarnings.push(msg('csv.unknownColumns', { columns: unknown.join(', ') }));
+  if (rows.length === 1) fileErrors.push(msg('csv.noRows'));
   if (fileErrors.length) return { fileErrors, fileWarnings, rows: [] };
 
   const idx = (c: Column) => header.indexOf(c);
@@ -139,17 +144,17 @@ export function parseProductCsv(rows: string[][], ctx: CsvContext): CsvParseResu
     const name = cell(r, 'name');
 
     const category = categoryLookup.get(norm(cell(r, 'category')));
-    if (!category) errors.push(`Turkum topilmadi: "${cell(r, 'category')}". Mavjud: ${ctx.categories.map((c) => c.id).join(', ')}.`);
+    if (!category) errors.push(msg('csv.categoryNotFound', { value: cell(r, 'category'), options: ctx.categories.map((c) => c.id).join(', ') }));
 
     const gender = GENDERS[norm(cell(r, 'gender'))];
-    if (!gender) errors.push(`Jins notoʻgʻri: "${cell(r, 'gender')}". men / women / unisex kiriting.`);
+    if (!gender) errors.push(msg('csv.genderInvalid', { value: cell(r, 'gender') }));
 
     const sizes = list(cell(r, 'sizes'));
     const colorIds: string[] = [];
     for (const raw of list(cell(r, 'colors'))) {
       const c = colorLookup.get(norm(raw));
       if (c) colorIds.push(c.id);
-      else errors.push(`Rang topilmadi: "${raw}".`);
+      else errors.push(msg('csv.colorNotFound', { value: raw }));
     }
 
     const unavailable: string[] = [];
@@ -157,7 +162,7 @@ export function parseProductCsv(rows: string[][], ctx: CsvContext): CsvParseResu
       const [size, colorRaw] = pair.split(':').map((s) => s.trim());
       const color = colorRaw ? colorLookup.get(norm(colorRaw)) : undefined;
       if (!size || !color || !sizes.includes(size) || !colorIds.includes(color.id)) {
-        errors.push(`"unavailable" qiymati notoʻgʻri: "${pair}". Format: OʻLCHAM:rang, masalan M:black.`);
+        errors.push(msg('csv.unavailableInvalid', { value: pair }));
       } else unavailable.push(variantKey(size, color.id));
     }
 
@@ -167,16 +172,16 @@ export function parseProductCsv(rows: string[][], ctx: CsvContext): CsvParseResu
         try {
           imageRefs.push({ kind: 'url', url: new URL(ref).toString() });
         } catch {
-          errors.push(`Rasm havolasi notoʻgʻri: "${ref}".`);
+          errors.push(msg('csv.imageUrlInvalid', { value: ref }));
         }
       } else if (/^[a-z]+:/i.test(ref)) {
-        errors.push(`Faqat https:// havolalar qabul qilinadi: "${ref}".`);
+        errors.push(msg('csv.imageHttpsOnly', { value: ref }));
       } else {
         const file = fileLookup.get(ref.toLowerCase()) ?? fileLookup.get(baseFilename(ref).toLowerCase());
-        if (!file) errors.push(`Rasm fayli tanlanmagan: "${ref}". CSV bilan birga shu faylni ham tanlang.`);
+        if (!file) errors.push(msg('csv.imageFileMissing', { value: ref }));
         else {
           const imgErr = validateImageFile(file);
-          if (imgErr) errors.push(`${file.name}: ${IMAGE_ERROR_TEXT[imgErr]}`);
+          if (imgErr) errors.push(msg('images.fileError', { file: file.name, message: IMAGE_ERROR_TEXT[imgErr] }));
           else imageRefs.push({ kind: 'file', file });
         }
       }
@@ -187,12 +192,12 @@ export function parseProductCsv(rows: string[][], ctx: CsvContext): CsvParseResu
     if (statusRaw) {
       status = STATUSES[norm(statusRaw)];
       if (!status) {
-        errors.push(`Holat notoʻgʻri: "${statusRaw}". active / inactive / archived kiriting.`);
+        errors.push(msg('csv.statusInvalid', { value: statusRaw }));
         status = 'inactive';
       }
     } else {
       status = imageRefs.length ? 'active' : 'inactive';
-      if (!imageRefs.length) warnings.push('Rasm yoʻq — qoralama (nofaol) sifatida saqlanadi.');
+      if (!imageRefs.length) warnings.push(msg('csv.noImagesDraft'));
     }
 
     const slugRaw = cell(r, 'slug');
@@ -203,6 +208,11 @@ export function parseProductCsv(rows: string[][], ctx: CsvContext): CsvParseResu
       name,
       slug,
       description: cell(r, 'description'),
+      translations: {
+        ...emptyTranslations(),
+        ru: { name: cell(r, 'name_ru'), description: cell(r, 'description_ru') },
+        en: { name: cell(r, 'name_en'), description: cell(r, 'description_en') },
+      },
       price: parsePrice(cell(r, 'price'), errors),
       categoryId: category?.id ?? DEFAULT_PRODUCT_INPUT.categoryId,
       gender: gender ?? 'men',
@@ -223,10 +233,10 @@ export function parseProductCsv(rows: string[][], ctx: CsvContext): CsvParseResu
 
     const v = validateProductInput(input, taken);
     if (!v.ok) {
-      for (const [field, msg] of Object.entries(v.errors)) {
+      for (const [field, message] of Object.entries(v.errors)) {
         // Avoid duplicating messages already reported above for the same field.
-        if (field === 'colorIds' && colorIds.length === 0 && errors.some((e) => e.startsWith('Rang'))) continue;
-        errors.push(`${field}: ${msg}`);
+        if (field === 'colorIds' && colorIds.length === 0 && errors.some((e) => e.includes('csv.colorNotFound'))) continue;
+        errors.push(msg('csv.fieldError', { field, message }));
       }
     }
 
@@ -254,6 +264,10 @@ export function productsToCsv(products: Product[]): { csv: string; skippedImages
       p.name,
       p.slug,
       p.description,
+      p.translations?.ru?.name ?? '',
+      p.translations?.ru?.description ?? '',
+      p.translations?.en?.name ?? '',
+      p.translations?.en?.description ?? '',
       p.price,
       p.categoryId,
       p.gender,
@@ -278,6 +292,10 @@ export function csvTemplate(): string {
       'Paxta futbolka',
       '',
       'Zich paxtadan tikilgan keng bichimli futbolka.',
+      'Хлопковая футболка',
+      'Футболка свободного кроя из плотного хлопка.',
+      'Cotton T-shirt',
+      'A relaxed-fit T-shirt in dense cotton.',
       '189000',
       'tshirts',
       'men',
@@ -295,6 +313,10 @@ export function csvTemplate(): string {
       'Midi koʻylak',
       'midi-koylak-yozgi',
       'Zigʻir aralash matodan midi koʻylak.',
+      'Платье миди',
+      'Платье миди из ткани с льном.',
+      '',
+      '',
       '529 000',
       'dresses',
       'women',

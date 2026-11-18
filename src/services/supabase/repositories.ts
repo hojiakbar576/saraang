@@ -15,8 +15,20 @@ import { validateCheckout } from '@/validation/checkout';
 import { validateProductInput, type ProductInput } from '@/features/products/admin/productInput';
 import { ORDERS_CHANGED_EVENT, PRODUCTS_CHANGED_EVENT, emit } from '@/services/events';
 import { errorCode, supabase, supabaseConfig } from './client';
-import { ORDER_SELECT, PRODUCT_SELECT, orderFromRow, productFromRow, type OrderRow, type ProductRow } from './mappers';
-import { t } from '@/i18n';
+import {
+  CATEGORY_SELECT,
+  COLOR_SELECT,
+  ORDER_SELECT,
+  PRODUCT_SELECT,
+  categoryFromRow,
+  colorFromRow,
+  orderFromRow,
+  productFromRow,
+  type OrderRow,
+  type ProductRow,
+  type TaxonomyRow,
+} from './mappers';
+import { msg } from '@/i18n';
 
 const BUCKET = 'product-images';
 
@@ -26,14 +38,17 @@ let taxonomyCache: Promise<{ categories: Category[]; colors: Color[] }> | null =
 function loadTaxonomy() {
   taxonomyCache ??= (async () => {
     const [cats, cols] = await Promise.all([
-      supabase().from('categories').select('id, name, genders').order('sort_order'),
-      supabase().from('colors').select('id, name, hex').order('sort_order'),
+      supabase().from('categories').select(CATEGORY_SELECT).order('sort_order'),
+      supabase().from('colors').select(COLOR_SELECT).order('sort_order'),
     ]);
     if (cats.error || cols.error) {
       taxonomyCache = null;
       throw cats.error ?? cols.error;
     }
-    return { categories: cats.data as Category[], colors: cols.data as Color[] };
+    return {
+      categories: (cats.data as unknown as (TaxonomyRow & { genders: Category['genders'] })[]).map(categoryFromRow),
+      colors: (cols.data as unknown as (TaxonomyRow & { hex: string })[]).map(colorFromRow),
+    };
   })();
   return taxonomyCache;
 }
@@ -84,9 +99,9 @@ async function saveProduct(id: string | null, input: ProductInput) {
   const { data, error } = await supabase().rpc('admin_save_product', { p_id: id, p: v.data });
   if (error) {
     const code = errorCode(error);
-    if (code === '23505') return { ok: false as const, errors: { slug: 'Bu slug boshqa mahsulotda ishlatilgan.' } };
-    if (code === 'validation:images') return { ok: false as const, errors: { images: 'Sotuvga chiqarish uchun kamida bitta rasm qoʻshing.' } };
-    if (code === 'not_found') return { ok: false as const, errors: { name: 'Mahsulot topilmadi.' } };
+    if (code === '23505') return { ok: false as const, errors: { slug: msg('validation.slugTaken') } };
+    if (code === 'validation:images') return { ok: false as const, errors: { images: msg('validation.imagesRequired') } };
+    if (code === 'not_found') return { ok: false as const, errors: { name: msg('validation.productNotFound') } };
     throw error;
   }
   const product = await getProduct(data as string);
@@ -155,7 +170,7 @@ export const supabaseOrderService: OrderService = {
       if (code === 'empty') return { ok: false, reason: 'empty' };
       if (code.startsWith('validation:')) {
         const field = code.slice('validation:'.length) as CheckoutField;
-        const errors: CheckoutErrors = CHECKOUT_FIELDS.includes(field) ? { [field]: t.checkout.fixErrors } : {};
+        const errors: CheckoutErrors = CHECKOUT_FIELDS.includes(field) ? { [field]: msg('checkout.fixErrors') } : {};
         return Object.keys(errors).length ? { ok: false, reason: 'validation', errors } : { ok: false, reason: 'failed' };
       }
       return { ok: false, reason: 'failed' };

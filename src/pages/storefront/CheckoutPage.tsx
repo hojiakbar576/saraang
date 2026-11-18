@@ -1,7 +1,7 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router';
 import { AlertCircle, Info } from 'lucide-react';
-import { t } from '@/i18n';
+import { useTranslation } from 'react-i18next';
 import { Container, Price, Skeleton } from '@/components/ui/primitives';
 import { Button } from '@/components/ui/Button';
 import { Checkbox, TextArea, TextField } from '@/components/ui/form';
@@ -11,6 +11,7 @@ import { formatLocalPhoneInput } from '@/lib/phone';
 import { validateCheckout, type CheckoutErrors, type CheckoutField } from '@/validation/checkout';
 import { orders } from '@/services/orders';
 import { saveLastReceipt } from '@/features/orders/lastReceipt';
+import { productName, sizeLabel, taxonomyName } from '@/i18n/content';
 
 interface FormState {
   fullName: string;
@@ -34,7 +35,8 @@ const toPayload = (f: FormState) => ({
 });
 
 export function CheckoutPage() {
-  usePageTitle(t.checkout.title);
+  const { t } = useTranslation();
+  usePageTitle(t('checkout.title'));
   const navigate = useNavigate();
   const { state, dispatch, lines, loading, subtotal, unavailableKeys, availableItemCount } = useResolvedCart();
   const [form, setForm] = useState<FormState>(INITIAL);
@@ -93,9 +95,9 @@ export function CheckoutPage() {
       setErrors(result.errors);
       focusFirstError(result.errors);
     } else if (result.reason === 'unavailable') {
-      setSubmitError(t.checkout.unavailableBlock);
+      setSubmitError(t('checkout.unavailableBlock'));
     } else {
-      setSubmitError(t.checkout.submitError);
+      setSubmitError(t('checkout.submitError'));
     }
   };
 
@@ -103,24 +105,24 @@ export function CheckoutPage() {
 
   return (
     <Container className="pt-10 sm:pt-14">
-      <h1 className="display mb-8 text-4xl sm:mb-10 sm:text-6xl">{t.checkout.title}</h1>
+      <h1 className="display mb-8 text-4xl sm:mb-10 sm:text-6xl">{t('checkout.title')}</h1>
 
       <div className="grid gap-10 lg:grid-cols-[1fr_420px] lg:gap-16">
         <form ref={formRef} onSubmit={onSubmit} noValidate className="order-2 space-y-10 lg:order-1">
           <div className="flex gap-3 border border-clay/30 bg-sand/50 p-4 text-sm">
             <Info size={18} strokeWidth={1.5} className="mt-0.5 shrink-0 text-clay" />
             <div>
-              <p className="font-medium">{t.checkout.noticeTitle}</p>
-              <p className="mt-1 leading-relaxed text-ink-soft">{t.checkout.noticeText}</p>
+              <p className="font-medium">{t('checkout.noticeTitle')}</p>
+              <p className="mt-1 leading-relaxed text-ink-soft">{t('checkout.noticeText')}</p>
             </div>
           </div>
 
           <section className="space-y-5">
-            <h2 className="eyebrow text-ink">{t.checkout.contactTitle}</h2>
+            <h2 className="eyebrow text-ink">{t('checkout.contactTitle')}</h2>
             <TextField
               name="fullName"
-              label={t.checkout.fullName}
-              placeholder={t.checkout.fullNamePlaceholder}
+              label={t('checkout.fullName')}
+              placeholder={t('checkout.fullNamePlaceholder')}
               autoComplete="name"
               value={form.fullName}
               onChange={(e) => update('fullName', e.target.value)}
@@ -133,24 +135,24 @@ export function CheckoutPage() {
               type="tel"
               inputMode="numeric"
               autoComplete="tel-national"
-              label={t.checkout.phone}
+              label={t('checkout.phone')}
               prefix="+998"
               placeholder="90 123 45 67"
               value={form.phoneLocal}
               onChange={(e) => update('phoneLocal', formatLocalPhoneInput(e.target.value))}
-              hint={t.checkout.phoneHint}
+              hint={t('checkout.phoneHint')}
               error={errors.phone}
               required
             />
           </section>
 
           <section className="space-y-5">
-            <h2 className="eyebrow text-ink">{t.checkout.deliveryTitle}</h2>
+            <h2 className="eyebrow text-ink">{t('checkout.deliveryTitle')}</h2>
             <TextField
               name="city"
-              label={t.checkout.city}
-              optionalLabel={t.checkout.optional}
-              placeholder={t.checkout.cityPlaceholder}
+              label={t('checkout.city')}
+              optionalLabel={t('checkout.optional')}
+              placeholder={t('checkout.cityPlaceholder')}
               autoComplete="address-level2"
               value={form.city}
               onChange={(e) => update('city', e.target.value)}
@@ -159,9 +161,9 @@ export function CheckoutPage() {
             />
             <TextField
               name="address"
-              label={t.checkout.address}
-              optionalLabel={t.checkout.optional}
-              placeholder={t.checkout.addressPlaceholder}
+              label={t('checkout.address')}
+              optionalLabel={t('checkout.optional')}
+              placeholder={t('checkout.addressPlaceholder')}
               autoComplete="street-address"
               value={form.address}
               onChange={(e) => update('address', e.target.value)}
@@ -170,9 +172,9 @@ export function CheckoutPage() {
             />
             <TextArea
               name="comment"
-              label={t.checkout.comment}
-              optionalLabel={t.checkout.optional}
-              placeholder={t.checkout.commentPlaceholder}
+              label={t('checkout.comment')}
+              optionalLabel={t('checkout.optional')}
+              placeholder={t('checkout.commentPlaceholder')}
               value={form.comment}
               onChange={(e) => update('comment', e.target.value)}
               error={errors.comment}
@@ -185,32 +187,32 @@ export function CheckoutPage() {
               name="privacyConsent"
               checked={form.privacyConsent}
               onChange={(e) => update('privacyConsent', e.target.checked)}
-              label={t.checkout.consent}
+              label={t('checkout.consent')}
               error={errors.privacyConsent}
             />
 
             {(submitError || (attempted && hasErrors)) && (
               <p role="alert" className="flex items-start gap-2 text-sm text-danger">
                 <AlertCircle size={16} className="mt-0.5 shrink-0" />
-                {submitError ?? t.checkout.fixErrors}
+                {submitError ?? t('checkout.fixErrors')}
               </p>
             )}
 
             <Button type="submit" size="lg" className="w-full" disabled={submitting || loading || unavailableKeys.length > 0}>
-              {submitting ? t.checkout.submitting : t.checkout.submit}
+              {submitting ? t('checkout.submitting') : t('checkout.submit')}
               {!submitting && <span className="opacity-70">·</span>}
               {!submitting && <Price amount={subtotal} />}
             </Button>
-            <p className="text-center text-xs text-muted">{t.preorder.short}</p>
+            <p className="text-center text-xs text-muted">{t('preorder.short')}</p>
           </div>
         </form>
 
         {/* Order summary */}
         <aside className="order-1 h-fit bg-mist p-5 sm:p-6 lg:sticky lg:top-28 lg:order-2">
           <div className="mb-4 flex items-baseline justify-between">
-            <h2 className="eyebrow text-ink">{t.checkout.summary}</h2>
+            <h2 className="eyebrow text-ink">{t('checkout.summary')}</h2>
             <Link to="/cart" className="text-xs text-muted underline underline-offset-4 hover:text-ink">
-              {t.checkout.editCart}
+              {t('checkout.editCart')}
             </Link>
           </div>
           {loading ? (
@@ -218,7 +220,7 @@ export function CheckoutPage() {
           ) : (
             <>
               {unavailableKeys.length > 0 && (
-                <p role="alert" className="mb-4 text-xs text-danger">{t.checkout.unavailableBlock}</p>
+                <p role="alert" className="mb-4 text-xs text-danger">{t('checkout.unavailableBlock')}</p>
               )}
               <ul className="space-y-4">
                 {lines.map(({ key, line, product, color, available, lineTotal }) => {
@@ -232,24 +234,24 @@ export function CheckoutPage() {
                         </span>
                       </div>
                       <div className="min-w-0 flex-1 text-sm">
-                        <p className="truncate font-medium">{product?.name ?? '—'}</p>
+                        <p className="truncate font-medium">{product ? productName(product) : '—'}</p>
                         <p className="text-xs text-muted">
-                          {line.size} · {color?.name ?? line.colorId}
+                          {sizeLabel(line.size)} · {color ? taxonomyName(color) : line.colorId}
                         </p>
                       </div>
-                      <div className="text-sm">{available ? <Price amount={lineTotal} /> : <span className="text-xs text-danger">{t.product.unavailable}</span>}</div>
+                      <div className="text-sm">{available ? <Price amount={lineTotal} /> : <span className="text-xs text-danger">{t('product.unavailable')}</span>}</div>
                     </li>
                   );
                 })}
               </ul>
               <div className="mt-5 space-y-2 border-t border-line pt-4 text-sm">
                 <div className="flex justify-between text-muted">
-                  <span>{t.checkout.items(availableItemCount)}</span>
+                  <span>{t('checkout.items', { count: availableItemCount })}</span>
                   <Price amount={subtotal} />
                 </div>
-                <p className="text-xs text-muted">{t.preorder.deliveryCostNote}</p>
+                <p className="text-xs text-muted">{t('preorder.deliveryCostNote')}</p>
                 <div className="flex justify-between pt-2 text-base font-medium">
-                  <span>{t.cart.total}</span>
+                  <span>{t('cart.total')}</span>
                   <Price amount={subtotal} />
                 </div>
               </div>

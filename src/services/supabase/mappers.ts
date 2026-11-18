@@ -1,4 +1,4 @@
-import type { CategoryId, Gender, Product, ProductStatus } from '@/types/catalog';
+import type { Category, CategoryId, Color, Gender, NameTranslations, Product, ProductStatus, ProductTranslations } from '@/types/catalog';
 import type { Order, OrderStatus } from '@/types/order';
 
 // ——— Row shapes returned by our select() calls ———
@@ -22,10 +22,45 @@ export interface ProductRow {
   updated_at: string;
   product_variants: { id: string; size: string; color_id: string; available: boolean }[] | null;
   product_images: { id: string; url: string; storage_path: string | null; alt: string; position: number }[] | null;
+  product_translations?: { locale: string; name: string; description: string }[] | null;
 }
 
 export const PRODUCT_SELECT =
-  'id, slug, name, description, price, category_id, gender, sizes, color_ids, delivery_min_days, delivery_max_days, featured, new_arrival, status, created_at, updated_at, product_variants(id, size, color_id, available), product_images(id, url, storage_path, alt, position)';
+  'id, slug, name, description, price, category_id, gender, sizes, color_ids, delivery_min_days, delivery_max_days, featured, new_arrival, status, created_at, updated_at, product_variants(id, size, color_id, available), product_images(id, url, storage_path, alt, position), product_translations(locale, name, description)';
+
+function translationsFromRows(rows: ProductRow['product_translations']): ProductTranslations {
+  const out: ProductTranslations = {};
+  for (const row of rows ?? []) {
+    if (row.locale === 'ru' || row.locale === 'en') out[row.locale] = { name: row.name ?? '', description: row.description ?? '' };
+  }
+  return out;
+}
+
+// ——— Taxonomy ———
+
+export interface TaxonomyRow {
+  id: string;
+  name: string;
+  name_ru: string | null;
+  name_en: string | null;
+}
+export const CATEGORY_SELECT = 'id, name, name_ru, name_en, genders';
+export const COLOR_SELECT = 'id, name, name_ru, name_en, hex';
+
+function nameTranslations(r: TaxonomyRow): NameTranslations {
+  const out: NameTranslations = {};
+  if (r.name_ru) out.ru = r.name_ru;
+  if (r.name_en) out.en = r.name_en;
+  return out;
+}
+
+export function categoryFromRow(r: TaxonomyRow & { genders: Gender[] }): Category {
+  return { id: r.id as CategoryId, name: r.name, genders: r.genders, translations: nameTranslations(r) };
+}
+
+export function colorFromRow(r: TaxonomyRow & { hex: string }): Color {
+  return { id: r.id, name: r.name, hex: r.hex, translations: nameTranslations(r) };
+}
 
 export function productFromRow(r: ProductRow): Product {
   const order = (size: string, color: string) => r.color_ids.indexOf(color) * 1000 + r.sizes.indexOf(size);
@@ -34,6 +69,7 @@ export function productFromRow(r: ProductRow): Product {
     slug: r.slug,
     name: r.name,
     description: r.description,
+    translations: translationsFromRows(r.product_translations),
     price: Number(r.price),
     categoryId: r.category_id,
     gender: r.gender,

@@ -1,34 +1,35 @@
 import { z } from 'zod';
 import { normalizeUzPhone } from '@/lib/phone';
-import { t } from '@/i18n';
+import { msg } from '@/i18n';
 
-const e = t.checkout.errors;
+// Error messages are message codes (see msg / translateMsg in @/i18n): they are
+// translated when shown, so they follow the language the customer picks.
 
 const optionalText = (max: number) =>
   z
     .string()
     .trim()
-    .max(max, e.tooLong(max))
+    .max(max, msg('checkout.errors.tooLong', { max }))
     .transform((v) => (v === '' ? null : v));
 
 /**
  * Checkout form schema. Used by the form for instant feedback AND by the order
- * service, which re-validates everything (the Phase 2 server function will too).
+ * service, which re-validates everything (the server function does too).
  */
 export const checkoutSchema = z.object({
   fullName: z
     .string()
     .trim()
-    .min(1, e.nameRequired)
-    .max(80, e.nameTooLong)
-    .refine((v) => (v.match(/\p{L}/gu) ?? []).length >= 2, e.nameInvalid)
+    .min(1, msg('checkout.errors.nameRequired'))
+    .max(80, msg('checkout.errors.nameTooLong'))
+    .refine((v) => (v.match(/\p{L}/gu) ?? []).length >= 2, msg('checkout.errors.nameInvalid'))
     .transform((v) => v.replace(/\s+/g, ' ')),
   phone: z
     .string()
     .transform((v, ctx) => {
       const n = normalizeUzPhone(v);
       if (!n) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: e.phoneInvalid });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: msg('checkout.errors.phoneInvalid') });
         return z.NEVER;
       }
       return n;
@@ -36,12 +37,13 @@ export const checkoutSchema = z.object({
   city: optionalText(60),
   address: optionalText(300),
   comment: optionalText(500),
-  privacyConsent: z.literal(true, { errorMap: () => ({ message: e.consent }) }),
+  privacyConsent: z.literal(true, { errorMap: () => ({ message: msg('checkout.errors.consent') }) }),
 });
 
 export type CheckoutFormValues = z.input<typeof checkoutSchema>;
 export type CheckoutData = z.output<typeof checkoutSchema>;
 export type CheckoutField = keyof CheckoutFormValues;
+/** Field → message code. Render with translateMsg(). */
 export type CheckoutErrors = Partial<Record<CheckoutField, string>>;
 
 export function validateCheckout(

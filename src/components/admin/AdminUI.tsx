@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { OrderStatus } from '@/types/order';
 import type { ProductStatus } from '@/types/catalog';
-import { t } from '@/i18n';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/cn';
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: ReactNode }) {
@@ -57,14 +57,16 @@ const PRODUCT_STATUS_STYLE: Record<ProductStatus, string> = {
 };
 
 export function ProductStatusBadge({ status }: { status: ProductStatus }) {
+  const { t } = useTranslation();
   return (
     <span className={cn('inline-flex items-center px-2 py-0.5 text-[11px] font-medium whitespace-nowrap', PRODUCT_STATUS_STYLE[status])}>
-      {t.admin.products.status[status]}
+      {t(`admin.products.status.${status}`)}
     </span>
   );
 }
 
 export function Notice({ tone = 'info', children, onClose }: { tone?: 'info' | 'success' | 'error'; children: ReactNode; onClose?: () => void }) {
+  const { t } = useTranslation();
   return (
     <div
       role={tone === 'error' ? 'alert' : 'status'}
@@ -77,7 +79,7 @@ export function Notice({ tone = 'info', children, onClose }: { tone?: 'info' | '
     >
       <div className="min-w-0">{children}</div>
       {onClose && (
-        <button type="button" onClick={onClose} className="-mr-1 shrink-0 px-1 opacity-60 hover:opacity-100" aria-label="Yopish">
+        <button type="button" onClick={onClose} className="-mr-1 shrink-0 px-1 opacity-60 hover:opacity-100" aria-label={t('common.close')}>
           ×
         </button>
       )}
@@ -91,9 +93,10 @@ export const adminInput =
   'h-10 border border-line bg-paper px-3 text-sm placeholder:text-muted/60 focus:border-ink focus:outline-none hover:border-stone';
 
 export function StatusBadge({ status }: { status: OrderStatus }) {
+  const { t } = useTranslation();
   return (
     <span className={cn('inline-flex items-center px-2 py-0.5 text-[11px] font-medium whitespace-nowrap', STATUS_STYLE[status])}>
-      {t.orderStatus[status]}
+      {t(`orderStatus.${status}`)}
     </span>
   );
 }

@@ -33,3 +33,10 @@ for (const name of ['localStorage', 'sessionStorage'] as const) {
     Object.defineProperty(window, name, { value: storage, configurable: true, writable: true });
   }
 }
+
+// i18n reads the saved language from localStorage, so load it after the storage above.
+const { default: i18n } = await import('@/i18n');
+beforeEach(async () => {
+  localStorage.removeItem('store.lang');
+  await i18n.changeLanguage('uz');
+});

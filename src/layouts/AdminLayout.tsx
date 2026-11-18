@@ -2,29 +2,33 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { BarChart3, ExternalLink, FlaskConical, LayoutDashboard, LogOut, Menu, Package, Settings, ShoppingCart } from 'lucide-react';
 import { brand } from '@/config/brand';
-import { t } from '@/i18n';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { cn } from '@/lib/cn';
 import { Drawer } from '@/components/ui/Drawer';
 import { useAdminAuth } from '@/features/admin/AdminAuthContext';
+import { displayLogin } from '@/features/admin/adminLogin';
 
+// Labels are translation keys, translated at render time.
 const NAV = [
-  { to: '/admin', label: t.admin.nav.dashboard, icon: LayoutDashboard, end: true },
-  { to: '/admin/products', label: t.admin.nav.products, icon: Package },
-  { to: '/admin/orders', label: t.admin.nav.orders, icon: ShoppingCart },
-  { to: '/admin/analytics', label: t.admin.nav.analytics, icon: BarChart3 },
-  { to: '/admin/settings', label: t.admin.nav.settings, icon: Settings },
-];
+  { to: '/admin', labelKey: 'admin.nav.dashboard', icon: LayoutDashboard, end: true },
+  { to: '/admin/products', labelKey: 'admin.nav.products', icon: Package },
+  { to: '/admin/orders', labelKey: 'admin.nav.orders', icon: ShoppingCart },
+  { to: '/admin/analytics', labelKey: 'admin.nav.analytics', icon: BarChart3 },
+  { to: '/admin/settings', labelKey: 'admin.nav.settings', icon: Settings },
+] as const;
 
 function SidebarContent({ onLogout }: { onLogout: () => void }) {
+  const { t } = useTranslation();
   const { session } = useAdminAuth();
   return (
     <div className="flex h-full flex-col">
-      <nav className="flex-1 space-y-0.5 px-3 py-4" aria-label={t.admin.panel}>
-        {NAV.map(({ to, label, icon: Icon, end }) => (
+      <nav className="flex-1 space-y-0.5 px-3 py-4" aria-label={t('admin.panel')}>
+        {NAV.map(({ to, labelKey, icon: Icon, ...rest }) => (
           <NavLink
             key={to}
             to={to}
-            end={end}
+            end={'end' in rest ? rest.end : undefined}
             className={({ isActive }) =>
               cn(
                 'flex h-10 items-center gap-3 px-3 text-[13px] tracking-wide transition-colors',
@@ -33,14 +37,17 @@ function SidebarContent({ onLogout }: { onLogout: () => void }) {
             }
           >
             <Icon size={17} strokeWidth={1.5} />
-            {label}
+            {t(labelKey)}
           </NavLink>
         ))}
       </nav>
       <div className="space-y-1 border-t border-line px-3 py-4">
+        <div className="px-3 pb-2">
+          <LanguageSwitcher variant="block" />
+        </div>
         <Link to="/" target="_blank" className="flex h-10 items-center gap-3 px-3 text-[13px] text-ink-soft hover:bg-mist hover:text-ink">
           <ExternalLink size={17} strokeWidth={1.5} />
-          {t.admin.viewStore}
+          {t('admin.viewStore')}
         </Link>
         <button
           type="button"
@@ -48,11 +55,11 @@ function SidebarContent({ onLogout }: { onLogout: () => void }) {
           className="flex h-10 w-full items-center gap-3 px-3 text-left text-[13px] text-ink-soft hover:bg-mist hover:text-ink"
         >
           <LogOut size={17} strokeWidth={1.5} />
-          {t.admin.logout}
+          {t('admin.logout')}
         </button>
         {session && (
-          <p className="truncate px-3 pt-2 text-[11px] text-muted" title={session.email}>
-            {t.admin.signedInAs} {session.email}
+          <p className="truncate px-3 pt-2 text-[11px] text-muted" title={displayLogin(session.email)}>
+            {t('admin.signedInAs')} {displayLogin(session.email)}
           </p>
         )}
       </div>
@@ -61,15 +68,17 @@ function SidebarContent({ onLogout }: { onLogout: () => void }) {
 }
 
 function BrandMark() {
+  const { t } = useTranslation();
   return (
     <Link to="/admin" className="flex flex-col leading-none">
       <span className="display text-lg tracking-[0.18em] uppercase">{brand.name}</span>
-      <span className="mt-1 text-[10px] tracking-[0.2em] text-muted uppercase">{t.admin.panel}</span>
+      <span className="mt-1 text-[10px] tracking-[0.2em] text-muted uppercase">{t('admin.panel')}</span>
     </Link>
   );
 }
 
 export function AdminLayout() {
+  const { t } = useTranslation();
   const { session, signOut } = useAdminAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -100,7 +109,7 @@ export function AdminLayout() {
 
       <div className="lg:pl-60">
         <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-line bg-paper px-4 lg:hidden">
-          <button type="button" onClick={() => setMenuOpen(true)} aria-label={t.nav.openMenu} className="-ml-2 p-2 hover:bg-mist">
+          <button type="button" onClick={() => setMenuOpen(true)} aria-label={t('nav.openMenu')} className="-ml-2 p-2 hover:bg-mist">
             <Menu size={20} strokeWidth={1.5} />
           </button>
           <BrandMark />
@@ -110,7 +119,7 @@ export function AdminLayout() {
         {session?.isMock && (
           <div role="note" className="flex items-center gap-2 border-b border-dashed border-clay/50 bg-sand/50 px-4 py-2 text-xs text-ink-soft lg:px-8">
             <FlaskConical size={14} className="shrink-0 text-clay" />
-            {t.admin.mockBanner}
+            {t('admin.mockBanner')}
           </div>
         )}
 
@@ -119,7 +128,7 @@ export function AdminLayout() {
         </main>
       </div>
 
-      <Drawer open={menuOpen} onClose={() => setMenuOpen(false)} title={t.admin.panel} closeLabel={t.nav.closeMenu}>
+      <Drawer open={menuOpen} onClose={() => setMenuOpen(false)} title={t('admin.panel')} closeLabel={t('nav.closeMenu')}>
         <SidebarContent onLogout={logout} />
       </Drawer>
     </div>

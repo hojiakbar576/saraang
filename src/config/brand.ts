@@ -1,16 +1,14 @@
 /**
  * Single source of truth for brand identity and public contact details.
- * The brand name is temporary — change it here and it updates everywhere.
+ * The brand name is never translated. Tagline, city and working hours are
+ * translated: see brand.* in src/locales/<lang>/translation.json.
  */
 export const brand = {
-  name: 'YOUR BRAND',
-  shortName: 'YB',
-  tagline: 'Zamonaviy kiyim. Toshkentga yetkazib berish.',
-  city: 'Toshkent',
+  name: 'SARANG',
+  shortName: 'S',
   phone: '+998 90 000 00 00',
   phoneHref: 'tel:+998900000000',
-  email: 'hello@yourbrand.uz',
-  workingHours: 'Har kuni, 10:00 – 20:00',
+  email: 'hello@sarang.uz',
   social: {
     instagram: 'https://instagram.com/',
     telegram: 'https://t.me/',

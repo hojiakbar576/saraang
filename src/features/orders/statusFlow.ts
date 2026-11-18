@@ -79,6 +79,20 @@ export function applyStatusChange(
   };
 }
 
+/**
+ * Stored text of the automatic note written when the received amount is corrected.
+ * Language-neutral ("amount_corrected:OLD:NEW"); the admin UI shows it translated.
+ * The database function admin_correct_amount_received writes the same format.
+ */
+export function amountCorrectionNote(from: number | null, to: number): string {
+  return `amount_corrected:${from ?? ''}:${to}`;
+}
+
+export function parseAmountCorrectionNote(text: string): { from: number | null; to: number } | null {
+  const m = /^amount_corrected:(\d*):(\d+)$/.exec(text);
+  return m ? { from: m[1] ? Number(m[1]) : null, to: Number(m[2]) } : null;
+}
+
 /** Correct the received amount of an already delivered order. */
 export function applyAmountCorrection(
   order: Order,
@@ -95,7 +109,7 @@ export function applyAmountCorrection(
       updatedAt: ctx.now,
       internalNotes: [
         ...order.internalNotes,
-        { id: ctx.newId(), text: `Olingan summa oʻzgartirildi: ${order.amountReceived ?? '—'} → ${amount} soʻm`, at: ctx.now },
+        { id: ctx.newId(), text: amountCorrectionNote(order.amountReceived, amount), at: ctx.now },
       ],
     },
   };

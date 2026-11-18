@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { AlertCircle, ArrowLeft, CheckCircle2, Download, FileSpreadsheet, ImageIcon, TriangleAlert } from 'lucide-react';
-import { t } from '@/i18n';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/cn';
 import { Notice, PageHeader, Panel } from '@/components/admin/AdminUI';
 import { Button, ButtonLink } from '@/components/ui/Button';
@@ -14,8 +14,9 @@ import { csvTemplate, parseProductCsv, type CsvParseResult } from '@/features/cs
 import { prepareImage } from '@/features/products/admin/images';
 import type { ProductImage } from '@/types/catalog';
 import type { ProductInput } from '@/features/products/admin/productInput';
+import { translateMsg } from '@/i18n';
+import { formatUZS } from '@/lib/money';
 
-const ti = t.admin.importPage;
 
 function FilePicker({ accept, multiple, label, onFiles }: { accept: string; multiple?: boolean; label: string; onFiles: (files: File[]) => void }) {
   return (
@@ -36,7 +37,8 @@ function FilePicker({ accept, multiple, label, onFiles }: { accept: string; mult
 }
 
 export function ProductImportPage() {
-  usePageTitle(ti.title);
+  const { t } = useTranslation();
+  usePageTitle(t('admin.importPage.title'));
   const [csvText, setCsvText] = useState<string | null>(null);
   const [csvName, setCsvName] = useState('');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -103,57 +105,57 @@ export function ProductImportPage() {
   return (
     <>
       <Link to="/admin/products" className="mb-3 inline-flex items-center gap-1 text-xs text-muted hover:text-ink">
-        <ArrowLeft size={13} /> {t.admin.productForm.back}
+        <ArrowLeft size={13} /> {t('admin.productForm.back')}
       </Link>
-      <PageHeader title={ti.title} subtitle={ti.intro} />
+      <PageHeader title={t('admin.importPage.title')} subtitle={t('admin.importPage.intro')} />
 
       {outcome?.ok && (
         <Notice tone="success">
-          <p className="flex items-center gap-2"><CheckCircle2 size={16} /> {ti.done(outcome.count)}</p>
-          {outcome.skipped > 0 && <p className="mt-1">{ti.skipped(outcome.skipped)}</p>}
-          <ButtonLink to="/admin/products" variant="link" className="mt-2 text-sm">{t.admin.products.title}</ButtonLink>
+          <p className="flex items-center gap-2"><CheckCircle2 size={16} /> {t('admin.importPage.done', { count: outcome.count })}</p>
+          {outcome.skipped > 0 && <p className="mt-1">{t('admin.importPage.skipped', { count: outcome.skipped })}</p>}
+          <ButtonLink to="/admin/products" variant="link" className="mt-2 text-sm">{t('admin.products.title')}</ButtonLink>
         </Notice>
       )}
-      {outcome && !outcome.ok && <Notice tone="error">{ti.failed}</Notice>}
+      {outcome && !outcome.ok && <Notice tone="error">{t('admin.importPage.failed')}</Notice>}
 
       <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
         <div className="space-y-6">
-          <Panel title={ti.step2}>
+          <Panel title={t('admin.importPage.step2')}>
             <div className="grid gap-5 p-5 md:grid-cols-2">
               <div>
-                <label className="mb-2 flex items-center gap-2 text-[13px] font-medium"><FileSpreadsheet size={15} /> {ti.csvFile}</label>
-                <FilePicker accept=".csv,text/csv" label={ti.chooseCsv} onFiles={(f) => onCsv(f[0])} />
+                <label className="mb-2 flex items-center gap-2 text-[13px] font-medium"><FileSpreadsheet size={15} /> {t('admin.importPage.csvFile')}</label>
+                <FilePicker accept=".csv,text/csv" label={t('admin.importPage.chooseCsv')} onFiles={(f) => onCsv(f[0])} />
                 {csvName && <p className="mt-1.5 truncate text-xs text-muted">{csvName}</p>}
-                {readError && <p role="alert" className="mt-1.5 text-xs text-danger">{ti.readError}</p>}
+                {readError && <p role="alert" className="mt-1.5 text-xs text-danger">{t('admin.importPage.readError')}</p>}
               </div>
               <div>
-                <label className="mb-2 flex items-center gap-2 text-[13px] font-medium"><ImageIcon size={15} /> {ti.imageFiles}</label>
-                <FilePicker accept="image/jpeg,image/png,image/webp" multiple label={ti.chooseImages} onFiles={setImageFiles} />
-                <p className="mt-1.5 text-xs text-muted">{imageFiles.length ? ti.selectedImages(imageFiles.length) : ti.imageFilesHint}</p>
+                <label className="mb-2 flex items-center gap-2 text-[13px] font-medium"><ImageIcon size={15} /> {t('admin.importPage.imageFiles')}</label>
+                <FilePicker accept="image/jpeg,image/png,image/webp" multiple label={t('admin.importPage.chooseImages')} onFiles={setImageFiles} />
+                <p className="mt-1.5 text-xs text-muted">{imageFiles.length ? t('admin.importPage.selectedImages', { count: imageFiles.length }) : t('admin.importPage.imageFilesHint')}</p>
               </div>
             </div>
           </Panel>
 
           {result && (
-            <Panel title={ti.step3}>
+            <Panel title={t('admin.importPage.step3')}>
               <div className="p-5">
                 {result.fileErrors.map((e) => (
-                  <p key={e} role="alert" className="mb-2 flex items-start gap-2 text-sm text-danger"><AlertCircle size={16} className="mt-0.5 shrink-0" /> {e}</p>
+                  <p key={e} role="alert" className="mb-2 flex items-start gap-2 text-sm text-danger"><AlertCircle size={16} className="mt-0.5 shrink-0" /> {translateMsg(e, t)}</p>
                 ))}
                 {result.fileWarnings.map((w) => (
-                  <p key={w} className="mb-2 flex items-start gap-2 text-sm text-clay"><TriangleAlert size={16} className="mt-0.5 shrink-0" /> {w}</p>
+                  <p key={w} className="mb-2 flex items-start gap-2 text-sm text-clay"><TriangleAlert size={16} className="mt-0.5 shrink-0" /> {translateMsg(w, t)}</p>
                 ))}
                 {result.rows.length > 0 && (
                   <>
-                    <p className="mb-1 text-sm font-medium">{ti.summary(validRows.length, invalidRows.length)}</p>
-                    {invalidRows.length > 0 && <p className="mb-4 text-xs text-danger">{ti.invalidNote}</p>}
+                    <p className="mb-1 text-sm font-medium">{t('admin.importPage.summary', { ok: validRows.length, bad: invalidRows.length })}</p>
+                    {invalidRows.length > 0 && <p className="mb-4 text-xs text-danger">{t('admin.importPage.invalidNote')}</p>}
                     <div className="max-h-[520px] overflow-auto border border-line">
                       <table className="w-full text-left text-sm">
                         <thead className="sticky top-0 bg-mist text-[11px] tracking-[0.12em] text-muted uppercase">
                           <tr>
-                            <th className="px-3 py-2 font-medium">{ti.row}</th>
-                            <th className="px-3 py-2 font-medium">{t.admin.products.columns.product}</th>
-                            <th className="px-3 py-2 font-medium">{ti.result}</th>
+                            <th className="px-3 py-2 font-medium">{t('admin.importPage.row')}</th>
+                            <th className="px-3 py-2 font-medium">{t('admin.products.columns.product')}</th>
+                            <th className="px-3 py-2 font-medium">{t('admin.importPage.result')}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-line">
@@ -162,15 +164,15 @@ export function ProductImportPage() {
                               <td className="px-3 py-2 align-top text-muted tabular-nums">{r.rowNumber}</td>
                               <td className="px-3 py-2 align-top">
                                 <p className="font-medium">{r.name || '—'}</p>
-                                {r.input && <p className="text-xs text-muted">/{r.input.slug} · {r.input.price.toLocaleString('ru-RU')} soʻm · {r.imageRefs.length} rasm</p>}
+                                {r.input && <p className="text-xs text-muted">/{r.input.slug} · {formatUZS(r.input.price)} · {t('admin.importPage.imagesCount', { count: r.imageRefs.length })}</p>}
                               </td>
                               <td className="px-3 py-2 align-top text-xs">
                                 {r.input ? (
-                                  <span className="inline-flex items-center gap-1 text-success"><CheckCircle2 size={13} /> {ti.ready}</span>
+                                  <span className="inline-flex items-center gap-1 text-success"><CheckCircle2 size={13} /> {t('admin.importPage.ready')}</span>
                                 ) : (
-                                  <ul className="space-y-0.5 text-danger">{r.errors.map((e) => <li key={e}>• {e}</li>)}</ul>
+                                  <ul className="space-y-0.5 text-danger">{r.errors.map((e) => <li key={e}>• {translateMsg(e, t)}</li>)}</ul>
                                 )}
-                                {r.warnings.map((w) => <p key={w} className="mt-0.5 text-clay">{w}</p>)}
+                                {r.warnings.map((w) => <p key={w} className="mt-0.5 text-clay">{translateMsg(w, t)}</p>)}
                               </td>
                             </tr>
                           ))}
@@ -179,7 +181,7 @@ export function ProductImportPage() {
                     </div>
                     <div className="mt-4 flex flex-wrap items-center gap-3">
                       <Button onClick={runImport} disabled={!validRows.length || !!progress}>
-                        {progress ? ti.importing(progress.done, progress.total) : ti.confirm(validRows.length)}
+                        {progress ? t('admin.importPage.importing', { done: progress.done, total: progress.total }) : t('admin.importPage.confirm', { count: validRows.length })}
                       </Button>
                     </div>
                   </>
@@ -190,16 +192,16 @@ export function ProductImportPage() {
         </div>
 
         <div className="order-first space-y-6 xl:order-none">
-          <Panel title={ti.step1}>
+          <Panel title={t('admin.importPage.step1')}>
             <div className="p-5">
               <Button variant="secondary" size="sm" onClick={() => downloadTextFile('mahsulotlar-shablon.csv', csvTemplate())}>
-                <Download size={15} /> {ti.template}
+                <Download size={15} /> {t('admin.importPage.template')}
               </Button>
             </div>
           </Panel>
-          <Panel title={ti.columnsTitle}>
+          <Panel title={t('admin.importPage.columnsTitle')}>
             <ul className="space-y-2 p-5 text-xs leading-relaxed text-ink-soft">
-              {ti.columnsHelp.map((h) => <li key={h}>• {h}</li>)}
+              {t('admin.importPage.columnsHelp', { returnObjects: true }).map((h) => <li key={h}>• {h}</li>)}
             </ul>
           </Panel>
         </div>

@@ -1,6 +1,8 @@
 import { forwardRef, useId, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from 'react';
 import { Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/cn';
+import { translateMsg } from '@/i18n';
 
 const control =
   'w-full border bg-paper px-4 text-[15px] text-ink placeholder:text-muted/60 transition-colors focus:outline-none disabled:opacity-50';
@@ -16,6 +18,7 @@ interface FieldShellProps {
 }
 
 function FieldShell({ id, label, hint, optionalLabel, error, children }: FieldShellProps) {
+  const { t } = useTranslation();
   return (
     <div>
       <label htmlFor={id} className="mb-2 flex items-baseline gap-2 text-[13px] font-medium">
@@ -25,7 +28,7 @@ function FieldShell({ id, label, hint, optionalLabel, error, children }: FieldSh
       {children}
       {error ? (
         <p id={`${id}-error`} role="alert" className="mt-1.5 text-xs text-danger">
-          {error}
+          {translateMsg(error, t)}
         </p>
       ) : (
         hint && (
@@ -103,6 +106,7 @@ interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'typ
 }
 
 export function Checkbox({ label, error, checked, id: idProp, ...rest }: CheckboxProps) {
+  const { t } = useTranslation();
   const autoId = useId();
   const id = idProp ?? autoId;
   return (
@@ -129,7 +133,7 @@ export function Checkbox({ label, error, checked, id: idProp, ...rest }: Checkbo
       </label>
       {error && (
         <p id={`${id}-error`} role="alert" className="mt-1.5 pl-[30px] text-xs text-danger">
-          {error}
+          {translateMsg(error, t)}
         </p>
       )}
     </div>

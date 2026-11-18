@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { translateMsg } from '@/i18n';
 import { MOCK_PRODUCTS } from '@/data/mock/products';
 import { CATEGORIES, COLORS } from '@/data/mock/taxonomy';
 import { slugify, uniqueSlug } from '@/features/products/admin/slug';
@@ -190,13 +191,13 @@ describe('product CSV import', () => {
     ].join('\n');
     const r = parseProductCsv(parseCsv(csv), ctx());
     expect(r.rows.map((x) => !!x.input)).toEqual([true, false, false, false, false, false]);
-    expect(r.rows[1].errors.join(' ')).toMatch(/Narx/);
-    expect(r.rows[2].errors.join(' ')).toMatch(/Turkum topilmadi/);
-    expect(r.rows[2].errors.join(' ')).toMatch(/Jins/);
-    expect(r.rows[2].errors.join(' ')).toMatch(/Rang topilmadi/);
-    expect(r.rows[3].errors.join(' ')).toMatch(/rasm/i);
-    expect(r.rows[4].errors.join(' ')).toMatch(/missing\.jpg/);
-    expect(r.rows[5].errors.join(' ')).toMatch(/https/);
+    expect(r.rows[1].errors.map((e) => translateMsg(e)).join(' ')).toMatch(/Narx/);
+    expect(r.rows[2].errors.map((e) => translateMsg(e)).join(' ')).toMatch(/Turkum topilmadi/);
+    expect(r.rows[2].errors.map((e) => translateMsg(e)).join(' ')).toMatch(/Jins/);
+    expect(r.rows[2].errors.map((e) => translateMsg(e)).join(' ')).toMatch(/Rang topilmadi/);
+    expect(r.rows[3].errors.map((e) => translateMsg(e)).join(' ')).toMatch(/rasm/i);
+    expect(r.rows[4].errors.map((e) => translateMsg(e)).join(' ')).toMatch(/missing\.jpg/);
+    expect(r.rows[5].errors.map((e) => translateMsg(e)).join(' ')).toMatch(/https/);
     expect(r.rows[1].rowNumber).toBe(3);
   });
 

@@ -1,4 +1,5 @@
 import type { CategoryId, Gender, Product } from '@/types/catalog';
+import { allProductNames } from '@/i18n/content';
 
 export type SortKey = 'newest' | 'price-asc' | 'price-desc';
 
@@ -42,7 +43,7 @@ function normalize(s: string): string {
 export function applyFilters(products: Product[], f: ProductFilters): Product[] {
   const q = normalize(f.query);
   const result = products.filter((p) => {
-    if (q && !normalize(`${p.name} ${p.description}`).includes(q)) return false;
+    if (q && !normalize(`${allProductNames(p).join(' ')} ${p.description} ${Object.values(p.translations ?? {}).map((x) => x?.description ?? '').join(' ')}`).includes(q)) return false;
     if (f.categoryIds.length && !f.categoryIds.includes(p.categoryId)) return false;
     if (f.genders.length && !f.genders.includes(p.gender)) return false;
     // Size/colour filters match only combinations that are actually available.

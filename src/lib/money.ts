@@ -1,3 +1,5 @@
+import { currentLang, type Lang } from '@/i18n';
+
 /**
  * Money is always handled as integer UZS (no fractional units, no floats).
  */
@@ -9,12 +11,22 @@ export function assertValidAmount(amount: number): asserts amount is UZS {
   }
 }
 
-/** 349000 → "349 000 soʻm" (narrow no-break spaces between groups). */
-export function formatUZS(amount: UZS, withCurrency = true): string {
+const CURRENCY: Record<Lang, string> = { uz: 'soʻm', ru: 'сум', en: 'UZS' };
+
+/** Currency label for the current language: "soʻm" / "сум" / "UZS". */
+export function currencyLabel(lang: Lang = currentLang()): string {
+  return CURRENCY[lang];
+}
+
+/**
+ * uz: "349 000 soʻm", ru: "349 000 сум", en: "349,000 UZS".
+ * Always whole so'm; groups use no-break spaces (uz/ru) or commas (en).
+ */
+export function formatUZS(amount: UZS, withCurrency = true, lang: Lang = currentLang()): string {
   const sign = amount < 0 ? '-' : '';
   const digits = Math.abs(Math.trunc(amount)).toString();
-  const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00A0');
-  return withCurrency ? `${sign}${grouped}\u00A0soʻm` : `${sign}${grouped}`;
+  const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, lang === 'en' ? ',' : '\u00A0');
+  return withCurrency ? `${sign}${grouped}\u00A0${CURRENCY[lang]}` : `${sign}${grouped}`;
 }
 
 export function multiply(price: UZS, quantity: number): UZS {

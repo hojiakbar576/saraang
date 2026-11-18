@@ -1,7 +1,8 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_MOCK_ADMIN_EMAIL?: string;
+  readonly VITE_MOCK_ADMIN_LOGIN?: string;
+  readonly VITE_ADMIN_LOGIN_DOMAIN?: string;
   readonly VITE_MOCK_ADMIN_PASSWORD?: string;
   readonly VITE_SUPABASE_URL?: string;
   /** Supabase publishable (anon) key — safe in the browser; RLS protects the data. */

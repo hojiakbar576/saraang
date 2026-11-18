@@ -1,6 +1,7 @@
+import { msg } from '@/i18n';
 import type { AdminProductRepository } from '../AdminProductRepository';
 import type { Product } from '@/types/catalog';
-import { buildVariants, validateProductInput, variantKey, type ProductInput } from '@/features/products/admin/productInput';
+import { buildVariants, productTranslationsFromInput, validateProductInput, variantKey, type ProductInput } from '@/features/products/admin/productInput';
 import { localProductStore, type ProductStore } from './localProductStore';
 import { localOrderStore } from '@/services/orders/mock/localOrderStore';
 import { imageStorage } from '@/services/storage';
@@ -14,6 +15,7 @@ function toProduct(id: string, input: ProductInput, createdAt: string, now: stri
     slug: input.slug.trim(),
     name: input.name.trim(),
     description: input.description.trim(),
+    translations: productTranslationsFromInput(input.translations),
     price: input.price,
     categoryId: input.categoryId,
     gender: input.gender,
@@ -59,7 +61,7 @@ export function createMockAdminProductRepository(
     async updateProduct(id, input) {
       const all = await store.all();
       const existing = all.find((p) => p.id === id);
-      if (!existing) return { ok: false, errors: { name: 'Mahsulot topilmadi.' } };
+      if (!existing) return { ok: false, errors: { name: msg('validation.productNotFound') } };
       const v = validateProductInput(input, all.filter((p) => p.id !== id).map((p) => p.slug));
       if (!v.ok) return v;
       const product = toProduct(id, v.data, existing.createdAt, new Date().toISOString());

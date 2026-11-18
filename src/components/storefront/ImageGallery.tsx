@@ -1,13 +1,14 @@
 import { useRef, useState } from 'react';
 import type { ProductImage } from '@/types/catalog';
-import { t } from '@/i18n';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/cn';
 
 /**
  * Mobile: horizontal swipe gallery with position dots.
  * Desktop: large main image with a vertical thumbnail rail.
  */
-export function ImageGallery({ images }: { images: ProductImage[] }) {
+export function ImageGallery({ images, name }: { images: ProductImage[]; name: string }) {
+  const { t } = useTranslation();
   const sorted = [...images].sort((a, b) => a.position - b.position);
   const [active, setActive] = useState(0);
   const scroller = useRef<HTMLDivElement>(null);
@@ -40,7 +41,7 @@ export function ImageGallery({ images }: { images: ProductImage[] }) {
             <img
               key={img.id}
               src={img.url}
-              alt={img.alt}
+              alt={name}
               loading={i === 0 ? 'eager' : 'lazy'}
               className="aspect-[4/5] w-full shrink-0 snap-center bg-mist object-cover"
             />
@@ -53,7 +54,7 @@ export function ImageGallery({ images }: { images: ProductImage[] }) {
                 key={img.id}
                 type="button"
                 onClick={() => goTo(i)}
-                aria-label={t.product.imageOf(i + 1, sorted.length)}
+                aria-label={t('product.imageOf', { index: i + 1, total: sorted.length })}
                 aria-current={i === active}
                 className={cn('h-1.5 rounded-full transition-all', i === active ? 'w-5 bg-ink' : 'w-1.5 bg-ink/30')}
               />
@@ -70,7 +71,7 @@ export function ImageGallery({ images }: { images: ProductImage[] }) {
               key={img.id}
               type="button"
               onClick={() => setActive(i)}
-              aria-label={t.product.imageOf(i + 1, sorted.length)}
+              aria-label={t('product.imageOf', { index: i + 1, total: sorted.length })}
               aria-current={i === active}
               className={cn(
                 'aspect-[4/5] overflow-hidden bg-mist ring-offset-2 ring-offset-paper transition',
@@ -82,7 +83,7 @@ export function ImageGallery({ images }: { images: ProductImage[] }) {
           ))}
         </div>
         <div className="aspect-[4/5] overflow-hidden bg-mist">
-          <img key={sorted[active]?.id} src={sorted[active]?.url} alt={sorted[active]?.alt} className="animate-fade-in h-full w-full object-cover" />
+          <img key={sorted[active]?.id} src={sorted[active]?.url} alt={name} className="animate-fade-in h-full w-full object-cover" />
         </div>
       </div>
     </div>

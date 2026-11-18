@@ -21,11 +21,16 @@ Run, in order, the files in `supabase/migrations/` (SQL editor, Supabase CLI
    product save/import, and the `product-images` storage bucket with admin-only upload
 3. `20261118075957_hardening.sql` — `place_order` temp-table guard, per-action admin
    write policies, order-number counter reset
+4. `20261118083718_product_translations.sql` — Russian/English product text
+   (`product_translations`), `name_ru`/`name_en` for categories and colours, translations in
+   `admin_save_product`, language-neutral amount-correction note (see docs/I18N.md)
+5. `20261118091130_admin_login.sql` — `admin_set_login()`: create an admin login or set its
+   password (SQL editor only; not callable from the website)
 
 File names match the versions recorded in the live project (applied 2026-11-18), so
 `supabase db push` sees them as already applied.
 
-Status of project `tuqaqmijpmcbxkfxjbig`: all three applied and smoke-tested
+Status of project `tuqaqmijpmcbxkfxjbig`: all five applied and smoke-tested
 (ordering, re-pricing, idempotency, unavailable variant, consent, rate limit, status
 flow, anon cannot see orders). The Supabase security advisor flags `place_order` and
 `is_admin` as callable by anonymous users — both are intentional (customers must place
@@ -35,16 +40,20 @@ orders; `is_admin` only reports on the caller).
 
 1. Authentication → Providers → Email: **disable "Allow new users to sign up"**.
    (Even if left on, a new account has no admin rights — but turn it off.)
-2. Authentication → Users → **Add user** → the shared admin email + a strong password
-   (tick "Auto confirm user").
-3. SQL editor — grant admin rights to exactly that account:
+2. Admins sign in with a **login name** (for example `admin`), not an email. Supabase
+   stores it as the internal address `<login>@admin.invalid` (`.invalid` can never
+   receive mail).
+3. The `admin` account already exists and has admin rights (created 2026-11-18 with a
+   random password nobody knows). To set or change a password — or to add another admin —
+   run in the SQL editor (it only works there, never from the website):
 
    ```sql
-   insert into public.admin_users (user_id)
-   select id from auth.users where email = 'ADMIN-EMAIL-HERE';
+   select public.admin_set_login('admin', 'your-new-password');
    ```
 
-Adding a second administrator later = repeat steps 2–3 for another email.
+   Minimum 10 characters. A new login name (e.g. `aziz`) creates another admin account.
+
+On the sign-in page type `admin` and the password.
 
 ## 4. Configure the app
 

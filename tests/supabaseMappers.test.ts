@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { orderFromRow, productFromRow, type OrderRow, type ProductRow } from '@/services/supabase/mappers';
+import { categoryFromRow, colorFromRow, orderFromRow, productFromRow, type OrderRow, type ProductRow } from '@/services/supabase/mappers';
 import { errorCode, supabaseEnabled } from '@/services/supabase/client';
 import { computeOverview } from '@/features/analytics/overview';
 
@@ -39,6 +39,28 @@ describe('Supabase row mapping', () => {
     expect(p.images.map((i) => i.id)).toEqual(['i1', 'i2']);
     expect(p.images[0].storagePath).toBe('products/1.webp');
     expect(p).toMatchObject({ categoryId: 'tshirts', colorIds: ['white', 'black'], newArrival: false, deliveryEstimate: { minDays: 14, maxDays: 21 } });
+  });
+
+  it('maps product translations and treats missing languages as absent', () => {
+    const p = productFromRow({
+      ...productRow,
+      product_translations: [
+        { locale: 'ru', name: 'Хлопковая футболка', description: 'Описание' },
+        { locale: 'xx', name: 'ignored', description: '' },
+      ],
+    });
+    expect(p.translations).toEqual({ ru: { name: 'Хлопковая футболка', description: 'Описание' } });
+    expect(productFromRow(productRow).translations).toEqual({});
+  });
+
+  it('maps category and colour names in all languages', () => {
+    expect(categoryFromRow({ id: 'tshirts', name: 'Futbolkalar', name_ru: 'Футболки', name_en: 'T-shirts', genders: ['men'] })).toEqual({
+      id: 'tshirts',
+      name: 'Futbolkalar',
+      genders: ['men'],
+      translations: { ru: 'Футболки', en: 'T-shirts' },
+    });
+    expect(colorFromRow({ id: 'black', name: 'Qora', name_ru: null, name_en: 'Black', hex: '#000000' }).translations).toEqual({ en: 'Black' });
   });
 
   it('maps orders (bigint strings → numbers) and keeps revenue rules intact', () => {

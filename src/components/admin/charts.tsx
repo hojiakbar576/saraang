@@ -1,12 +1,15 @@
+import { useTranslation } from 'react-i18next';
+import { t } from '@/i18n';
 import { useState } from 'react';
 import type { Bucket, Granularity, TopEntry } from '@/features/analytics/analytics';
 import { niceMax } from '@/features/analytics/analytics';
 import { cn } from '@/lib/cn';
 
-const MONTHS = ['yan', 'fev', 'mar', 'apr', 'may', 'iyn', 'iyl', 'avg', 'sen', 'okt', 'noy', 'dek'];
+const months = () => t('dates.monthsShort', { returnObjects: true }) as string[];
 
 export function bucketLabel(b: Bucket, g: Granularity, long = false): string {
   const d = b.start;
+  const MONTHS = months();
   if (g === 'month') return `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
   return long ? `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}` : `${d.getDate()} ${MONTHS[d.getMonth()]}`;
 }
@@ -108,13 +111,14 @@ export function ColumnChart({ buckets, granularity, integer = false, formatValue
 
 /** Table view of a time series — the accessible / exact-values alternative to the chart. */
 export function SeriesTable({ buckets, granularity, formatValue, valueLabel }: { buckets: Bucket[]; granularity: Granularity; formatValue: (v: number) => string; valueLabel: string }) {
+  const { t } = useTranslation();
   const rows = buckets.filter((b) => b.value > 0);
   return (
     <div className="max-h-60 overflow-auto">
       <table className="w-full text-sm">
         <thead className="sticky top-0 bg-paper text-[11px] tracking-[0.12em] text-muted uppercase">
           <tr className="border-b border-line">
-            <th className="py-2 text-left font-medium">Sana</th>
+            <th className="py-2 text-left font-medium">{t('admin.table.date')}</th>
             <th className="py-2 text-right font-medium">{valueLabel}</th>
           </tr>
         </thead>

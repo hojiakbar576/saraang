@@ -3,10 +3,12 @@ import type { Product } from '@/types/catalog';
 import { Badge, Price, Skeleton } from '@/components/ui/primitives';
 import { hasAnyAvailableVariant } from '@/features/products/variants';
 import { useTaxonomy } from '@/hooks/useCatalog';
-import { t } from '@/i18n';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/cn';
+import { productName, taxonomyName } from '@/i18n/content';
 
 export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
+  const { t } = useTranslation();
   const { data: tax } = useTaxonomy();
   const [primary, secondary] = [...product.images].sort((a, b) => a.position - b.position);
   const soldOut = !hasAnyAvailableVariant(product);
@@ -17,7 +19,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         {primary && (
           <img
             src={primary.url}
-            alt={primary.alt}
+            alt={productName(product)}
             loading={priority ? 'eager' : 'lazy'}
             className={cn(
               'absolute inset-0 h-full w-full object-cover transition-[opacity,transform] duration-700 ease-[var(--ease-soft)] group-hover:scale-[1.03]',
@@ -35,21 +37,21 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           />
         )}
         <div className="absolute top-3 left-3 flex gap-1.5">
-          {product.newArrival && <Badge>{t.product.newBadge}</Badge>}
-          {soldOut && <Badge className="text-muted">{t.product.soldOut}</Badge>}
+          {product.newArrival && <Badge>{t('product.newBadge')}</Badge>}
+          {soldOut && <Badge className="text-muted">{t('product.soldOut')}</Badge>}
         </div>
       </div>
       <div className="mt-3 flex flex-col gap-1 sm:mt-4">
-        <h3 className="text-[13px] leading-snug font-medium sm:text-sm">{product.name}</h3>
+        <h3 className="text-[13px] leading-snug font-medium sm:text-sm">{productName(product)}</h3>
         <Price amount={product.price} className="text-[13px] text-ink-soft sm:text-sm" />
         {tax && (
-          <div className="mt-1 flex gap-1.5" aria-label={t.product.color}>
+          <div className="mt-1 flex gap-1.5" aria-label={t('product.color')}>
             {product.colorIds.map((id) => {
               const c = tax.colorById.get(id);
               return c ? (
                 <span
                   key={id}
-                  title={c.name}
+                  title={taxonomyName(c)}
                   className="h-2.5 w-2.5 rounded-full ring-1 ring-black/10"
                   style={{ backgroundColor: c.hex }}
                 />

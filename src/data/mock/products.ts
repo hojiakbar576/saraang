@@ -5,9 +5,11 @@
 import type { CategoryId, Gender, Product, ProductImage, ProductVariant } from '@/types/catalog';
 import { COLORS } from './taxonomy';
 import { demoGarmentImage, type GarmentShape } from './demoImages';
+import { DEMO_PRODUCT_TRANSLATIONS } from './productTranslations';
+import { ONE_SIZE as ONE_SIZE_VALUE } from '@/i18n/content';
 
 const LETTER_SIZES = ['S', 'M', 'L', 'XL'];
-const ONE_SIZE = ['Bitta oʻlcham'];
+const ONE_SIZE = [ONE_SIZE_VALUE];
 
 interface Seed {
   slug: string;
@@ -48,11 +50,11 @@ function build(seed: Seed, index: number): Product {
   const [first, second] = seed.colorIds;
   const images: ProductImage[] = [
     { id: `${id}_img1`, url: demoGarmentImage(seed.shape, hexOf(first), 'front'), alt: seed.name, position: 0 },
-    { id: `${id}_img2`, url: demoGarmentImage(seed.shape, hexOf(first), 'detail'), alt: `${seed.name} — yaqindan`, position: 1 },
+    { id: `${id}_img2`, url: demoGarmentImage(seed.shape, hexOf(first), 'detail'), alt: seed.name, position: 1 },
     {
       id: `${id}_img3`,
       url: demoGarmentImage(seed.shape, hexOf(second ?? first), 'alt'),
-      alt: `${seed.name} — boshqa rang`,
+      alt: seed.name,
       position: 2,
     },
   ];
@@ -62,6 +64,7 @@ function build(seed: Seed, index: number): Product {
     slug: seed.slug,
     name: seed.name,
     description: seed.description,
+    translations: DEMO_PRODUCT_TRANSLATIONS[seed.slug],
     price: seed.price,
     categoryId: seed.categoryId,
     gender: seed.gender,

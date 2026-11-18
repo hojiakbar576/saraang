@@ -139,3 +139,23 @@ describe('admin access protection', () => {
     expect(safeAdminRedirect(null)).toBe('/admin');
   });
 });
+
+import { displayLogin, loginToEmail, normalizeLogin } from '@/features/admin/adminLogin';
+
+describe('admin login names', () => {
+  it('maps a login name to the internal email', () => {
+    expect(loginToEmail('  Admin ', 'admin.invalid')).toBe('admin@admin.invalid');
+    expect(loginToEmail('aziz.k', 'admin.invalid')).toBe('aziz.k@admin.invalid');
+  });
+  it('accepts a full email unchanged and rejects bad logins', () => {
+    expect(loginToEmail('Owner@Shop.uz')).toBe('owner@shop.uz');
+    expect(loginToEmail('a')).toBeNull();
+    expect(loginToEmail('bad name')).toBeNull();
+    expect(loginToEmail('x@y')).toBeNull();
+    expect(normalizeLogin('-admin')).toBeNull();
+  });
+  it('shows the login name instead of the internal email', () => {
+    expect(displayLogin('admin@admin.invalid', 'admin.invalid')).toBe('admin');
+    expect(displayLogin('owner@shop.uz', 'admin.invalid')).toBe('owner@shop.uz');
+  });
+});

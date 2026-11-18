@@ -50,21 +50,21 @@ describe('<CheckoutPage />', () => {
     const user = userEvent.setup();
     renderCheckout();
 
-    const submit = await screen.findByRole('button', { name: new RegExp(t.checkout.submit) });
+    const submit = await screen.findByRole('button', { name: new RegExp(t('checkout.submit')) });
     await waitFor(() => expect(submit).toBeEnabled());
     await user.click(submit);
-    expect(await screen.findByText(t.checkout.errors.nameRequired)).toBeInTheDocument();
-    expect(screen.getByText(t.checkout.errors.phoneInvalid)).toBeInTheDocument();
+    expect(await screen.findByText(t('checkout.errors.nameRequired'))).toBeInTheDocument();
+    expect(screen.getByText(t('checkout.errors.phoneInvalid'))).toBeInTheDocument();
     expect(localOrderStore.list()).toHaveLength(0);
 
-    await user.type(screen.getByLabelText(t.checkout.fullName), 'Aziza Karimova');
-    await user.type(screen.getByLabelText(t.checkout.phone), '901234567');
-    await user.click(screen.getByLabelText(t.checkout.consent));
+    await user.type(screen.getByLabelText(t('checkout.fullName')), 'Aziza Karimova');
+    await user.type(screen.getByLabelText(t('checkout.phone')), '901234567');
+    await user.click(screen.getByLabelText(t('checkout.consent')));
     await user.click(submit);
 
     expect(await screen.findByText('DEMO-1001', {}, { timeout: 3000 })).toBeInTheDocument();
     expect(screen.getByTestId('path')).toHaveTextContent('/order/success');
-    expect(screen.getByText(t.success.demoBanner)).toBeInTheDocument();
+    expect(screen.getByText(t('success.demoBanner'))).toBeInTheDocument();
     const stored = localOrderStore.list();
     expect(stored).toHaveLength(1);
     expect(stored[0].customer.phone).toBe('+998901234567');

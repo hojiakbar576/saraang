@@ -1,3 +1,4 @@
+import { msg } from '@/i18n';
 export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
 export const ACCEPT_ATTR = ACCEPTED_IMAGE_TYPES.join(',');
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -12,9 +13,10 @@ export function validateImageFile(file: { type: string; size: number }): ImageVa
   return null;
 }
 
+/** Message codes (translate with translateMsg). */
 export const IMAGE_ERROR_TEXT: Record<ImageValidationError, string> = {
-  type: 'Faqat JPG, PNG yoki WEBP rasm yuklash mumkin.',
-  size: `Rasm hajmi ${MAX_IMAGE_BYTES / 1024 / 1024} MB dan oshmasin.`,
+  type: msg('images.type'),
+  size: msg('images.size', { max: MAX_IMAGE_BYTES / 1024 / 1024 }),
 };
 
 /**

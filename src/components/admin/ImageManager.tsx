@@ -1,7 +1,7 @@
 import { useRef, useState, type DragEvent } from 'react';
 import { ChevronLeft, ChevronRight, ImagePlus, Star, Trash2, AlertCircle } from 'lucide-react';
 import type { ProductImage } from '@/types/catalog';
-import { t } from '@/i18n';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/cn';
 import { imageStorage } from '@/services/storage';
 import {
@@ -12,8 +12,8 @@ import {
   prepareImage,
   validateImageFile,
 } from '@/features/products/admin/images';
+import { msg, translateMsg } from '@/i18n';
 
-const tf = t.admin.productForm;
 
 interface Pending {
   id: string;
@@ -32,6 +32,7 @@ interface Props {
 }
 
 export function ImageManager({ images, onChange, onBusyChange, altBase, error }: Props) {
+  const { t } = useTranslation();
   const [pending, setPending] = useState<Pending[]>([]);
   const [fileErrors, setFileErrors] = useState<string[]>([]);
   const [dragOver, setDragOver] = useState(false);
@@ -47,11 +48,11 @@ export function ImageManager({ images, onChange, onBusyChange, altBase, error }:
     const valid: File[] = [];
     for (const f of files) {
       const err = validateImageFile(f);
-      if (err) errors.push(`${f.name}: ${IMAGE_ERROR_TEXT[err]}`);
+      if (err) errors.push(msg('images.fileError', { file: f.name, message: IMAGE_ERROR_TEXT[err] }));
       else valid.push(f);
     }
     if (valid.length > room) {
-      errors.push(tf.tooMany(MAX_IMAGES_PER_PRODUCT));
+      errors.push(msg('admin.productForm.tooMany', { max: MAX_IMAGES_PER_PRODUCT }));
       valid.splice(Math.max(room, 0));
     }
     setFileErrors(errors);
@@ -80,7 +81,7 @@ export function ImageManager({ images, onChange, onBusyChange, altBase, error }:
         latest.current = next;
         onChange(next);
       } catch {
-        setFileErrors((cur) => [...cur, `${file.name}: yuklab boʻlmadi.`]);
+        setFileErrors((cur) => [...cur, msg('images.uploadFailed', { file: file.name })]);
       } finally {
         URL.revokeObjectURL(p.preview);
         setPending((cur) => cur.filter((x) => x.id !== p.id));
@@ -126,24 +127,24 @@ export function ImageManager({ images, onChange, onBusyChange, altBase, error }:
           >
             <img src={img.url} alt={img.alt} className="h-full w-full object-cover" />
             {i === 0 && (
-              <span className="absolute top-1.5 left-1.5 bg-ink px-1.5 py-0.5 text-[10px] tracking-wider text-paper uppercase">{tf.primary}</span>
+              <span className="absolute top-1.5 left-1.5 bg-ink px-1.5 py-0.5 text-[10px] tracking-wider text-paper uppercase">{t('admin.productForm.primary')}</span>
             )}
             <div className="absolute inset-x-0 bottom-0 flex justify-between gap-1 p-1.5">
               <div className="flex gap-1">
-                <button type="button" className={iconBtn} onClick={() => move(i, i - 1)} disabled={i === 0} aria-label={tf.moveLeft} title={tf.moveLeft}>
+                <button type="button" className={iconBtn} onClick={() => move(i, i - 1)} disabled={i === 0} aria-label={t('admin.productForm.moveLeft')} title={t('admin.productForm.moveLeft')}>
                   <ChevronLeft size={14} />
                 </button>
-                <button type="button" className={iconBtn} onClick={() => move(i, i + 1)} disabled={i === images.length - 1} aria-label={tf.moveRight} title={tf.moveRight}>
+                <button type="button" className={iconBtn} onClick={() => move(i, i + 1)} disabled={i === images.length - 1} aria-label={t('admin.productForm.moveRight')} title={t('admin.productForm.moveRight')}>
                   <ChevronRight size={14} />
                 </button>
               </div>
               <div className="flex gap-1">
                 {i !== 0 && (
-                  <button type="button" className={iconBtn} onClick={() => move(i, 0)} aria-label={tf.makePrimary} title={tf.makePrimary}>
+                  <button type="button" className={iconBtn} onClick={() => move(i, 0)} aria-label={t('admin.productForm.makePrimary')} title={t('admin.productForm.makePrimary')}>
                     <Star size={13} />
                   </button>
                 )}
-                <button type="button" className={cn(iconBtn, 'hover:text-danger')} onClick={() => remove(i)} aria-label={tf.removeImage} title={tf.removeImage}>
+                <button type="button" className={cn(iconBtn, 'hover:text-danger')} onClick={() => remove(i)} aria-label={t('admin.productForm.removeImage')} title={t('admin.productForm.removeImage')}>
                   <Trash2 size={13} />
                 </button>
               </div>
@@ -155,7 +156,7 @@ export function ImageManager({ images, onChange, onBusyChange, altBase, error }:
           <figure key={p.id} className="relative aspect-[4/5] overflow-hidden bg-mist" aria-busy="true">
             <img src={p.preview} alt="" className="h-full w-full object-cover opacity-40" />
             <figcaption className="absolute inset-x-2 bottom-2">
-              <p className="mb-1 truncate text-[10px] text-ink">{tf.uploading} {Math.round(p.progress * 100)}%</p>
+              <p className="mb-1 truncate text-[10px] text-ink">{t('admin.productForm.uploading')} {Math.round(p.progress * 100)}%</p>
               <div className="h-1 w-full bg-paper/80">
                 <div className="h-1 bg-ink transition-[width]" style={{ width: `${Math.max(5, p.progress * 100)}%` }} />
               </div>
@@ -179,7 +180,7 @@ export function ImageManager({ images, onChange, onBusyChange, altBase, error }:
             )}
           >
             <ImagePlus size={22} strokeWidth={1.25} />
-            {tf.dropzone}
+            {t('admin.productForm.dropzone')}
           </button>
         )}
       </div>
@@ -190,17 +191,17 @@ export function ImageManager({ images, onChange, onBusyChange, altBase, error }:
         multiple
         className="sr-only"
         tabIndex={-1}
-        aria-label={tf.choose}
+        aria-label={t('admin.productForm.choose')}
         onChange={(e) => {
           if (e.target.files?.length) addFiles([...e.target.files]);
           e.target.value = '';
         }}
       />
-      <p className="mt-2 text-xs text-muted">{tf.imagesHint(MAX_IMAGES_PER_PRODUCT)}</p>
-      {error && <p role="alert" className="mt-1.5 text-xs text-danger">{error}</p>}
+      <p className="mt-2 text-xs text-muted">{t('admin.productForm.imagesHint', { max: MAX_IMAGES_PER_PRODUCT })}</p>
+      {error && <p role="alert" className="mt-1.5 text-xs text-danger">{translateMsg(error, t)}</p>}
       {fileErrors.map((e) => (
         <p key={e} role="alert" className="mt-1 flex items-center gap-1.5 text-xs text-danger">
-          <AlertCircle size={12} /> {e}
+          <AlertCircle size={12} /> {translateMsg(e, t)}
         </p>
       ))}
     </div>
