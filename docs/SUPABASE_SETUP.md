@@ -16,9 +16,20 @@ needed by the frontend — do not put it in any `VITE_*` variable or commit it.
 Run, in order, the files in `supabase/migrations/` (SQL editor, Supabase CLI
 `supabase db push`, or let Claude apply them through the Supabase connector):
 
-1. `20261117120000_init_schema.sql` — tables, constraints, indexes, RLS policies, categories and colours
-2. `20261117120100_functions_and_storage.sql` — `place_order`, order status functions,
+1. `20261118075601_init_schema.sql` — tables, constraints, indexes, RLS policies, categories and colours
+2. `20261118075714_functions_and_storage.sql` — `place_order`, order status functions,
    product save/import, and the `product-images` storage bucket with admin-only upload
+3. `20261118075957_hardening.sql` — `place_order` temp-table guard, per-action admin
+   write policies, order-number counter reset
+
+File names match the versions recorded in the live project (applied 2026-11-18), so
+`supabase db push` sees them as already applied.
+
+Status of project `tuqaqmijpmcbxkfxjbig`: all three applied and smoke-tested
+(ordering, re-pricing, idempotency, unavailable variant, consent, rate limit, status
+flow, anon cannot see orders). The Supabase security advisor flags `place_order` and
+`is_admin` as callable by anonymous users — both are intentional (customers must place
+orders; `is_admin` only reports on the caller).
 
 ## 3. Lock down sign-ups and create the admin account
 
